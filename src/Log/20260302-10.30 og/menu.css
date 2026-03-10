@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+
+
+.box-a {
+  /* ขนาดของกล่อง */
+  width: 200px;
+  height: 120px;
+
+  /* ระยะห่างด้านใน */
+  padding: 16px;
+
+  /* กรอบ */
+  border: 2px solid #646cff;
+  border-radius: 12px;
+
+  /* สีพื้นหลัง */
+  background-color: #1e1e1e;
+
+  /* ตัวอักษร */
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+
+  /* จัดข้อความให้อยู่กลางกล่อง */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* เงาเบา ๆ ให้ดูเป็นการ์ด */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.full_button {
+  width: 375px;
+  height: 60px;
+
+  padding: 16px;
+
+  margin-top: 10px;
+
+  /*เส้นขอบ*/
+  /* border: 2px solid #646cff;  */
+
+  border-radius: 5px; /*เส้นมนต์*/
+  background-color: white;
+
+  font-size: 18px; /*size font*/
+  font-weight: 500; /*bold font*/
+  color: black;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo_app {
+  width: 60%;
+  height: 50px;
+  /*เส้นขอบ*/
+  /* border: 2px solid white;  */
+  background-color: white;
+
+  font-size: 24px; /*size font*/
+  font-weight: 500; /*bold font*/
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+.half_button {
+  width: 50%;
+  height: 60px;
+
+  padding: 16px;
+
+  margin-top: 10px;
+  
+
+  /*เส้นขอบ*/
+  /* border: 2px solid #646cff;  */
+  
+  border-radius: 5px; /*เส้นมนต์*/
+  background-color: white;
+
+  font-size: 18px; /*size font*/
+  font-weight: 500; /*bold font*/
+  color: black;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.player_setup {
+  /* width: ; */
+  /* height: 100%; */
+
+  background: white;
+  margin-bottom: 10px;
+}
+
+.player_box {
+  width: 75%;
+  height: 60px;
+
+  margin: 10px;
+
+  border: 2px solid black; 
+  border-radius: 5px; /*เส้นมนต์*/
+
+  font-size: 18px; /*size font*/
+  font-weight: 500; /*bold font*/
+  color: black;
+
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+.playerInput{
+  width: 70%;
+}
+
+.rounded-button1 {
+  width: 50px;
+  height: 50px;
+
+  /* circle = 50% border */
+  border-radius: 50%;
+  
+  background-color: white;
+
+  font-size: 10px; /*size font*/
+  font-weight: 500; /*bold font*/
+  color: black;
+}
+
+.rounded-button2 {
+  width: 50px;
+  height: 50px;
+
+  /* margin-top: 5px; */
+  /* circle = 50% border */
+
+  border: 1px solid black; 
+  border-radius: 50%;
+  
+  background-color: white;
+
+  font-size: 24px; /*size font*/
+  font-weight: 500; /*bold font*/
+  color: black;
+  align-items: center;
+  justify-content: center;
+}
+
+.Play_area {
+  /* width: 50px; */
+  height: 30ex ;
+
+  /* margin-top: 5px; */
+  /* circle = 50% border */
+
+  border: 1px solid black; 
+  /* border-radius: 50%; */
+  
+  background-color: white;
+
+  font-size: 24px; /*size font*/
+  font-weight: 500; /*bold font*/
+  color: black;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawer {
+background-color: white;
+}

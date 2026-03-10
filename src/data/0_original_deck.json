@@ -1,0 +1,152 @@
+{
+    "id": "00",
+    "name": "Original_Deck",
+    "deck_description_thai": "สำรับพื้นฐาน เหมาะสำหรับผู้เล่นทุกระดับ",
+    "deck_description_eng": "The classic deck, suitable for all players",
+    "cards": [
+        {
+            "id": "classic-1",
+            "title": "shot-1",
+            "description_Eng": "Drinks 1 shot",
+            "description_Thai": "ดื่ม 1 ช็อต",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "",
+            "itemLabel_thai": ""
+        },
+        {
+            "id": "classic-2",
+            "title": "shot-2",
+            "description_Eng": "Drinks 2 shot",
+            "description_Thai": "ดื่ม 2 ช็อต",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "",
+            "itemLabel_thai": ""
+            
+        },
+        {
+            "id": "classic-3",
+            "title": "shot-3",
+            "description_Eng": "Drinks 3 shot",
+            "description_Thai": "ดื่ม 3 ช็อต",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "",
+            "itemLabel_thai": ""
+        },
+        {
+            "id": "classic-4",
+            "title": "shot-4",
+            "description_Eng": "Drinks 4 shot",
+            "description_Thai": "ดื่ม 4 ช็อต",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "",
+            "itemLabel_thai": ""
+        },
+        {
+            "id": "classic-5",
+            "title": "buddy-5",
+            "description_Eng": "Pair up with one player; whoever drinks, the other drinks too.",
+            "description_Thai": "จับคู่กับ player สักคน;ใครสักคนดื่ม อีกคนดื่มตาม",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "5 : select you buddy",
+            "itemLabel_thai": "🤝 มี buddy"
+        },
+        {
+            "id": "classic-6",
+            "title": "memory-6",
+            "description_Eng": "play the memory game",
+            "description_Thai": "เล่นเกมความจำ",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "",
+            "itemLabel_thai": ""
+        },
+        {
+            "id": "classic-7",
+            "title": "memory-7",
+            "description_Eng": "play the number game",
+            "description_Thai": "เล่นเกมไม่นับ 7",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "",
+            "itemLabel_thai": ""
+        },
+        {
+            "id": "classic-8",
+            "title": "memory-8",
+            "description_Eng": "Tolite card",
+            "description_Thai": "ไพ่เข้าห้องน้ำ",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "",
+            "itemLabel_thai": ""
+        },
+        {
+            "id": "classic-9",
+            "title": "memory-9",
+            "description_Eng": "Left hand player's, take 1 shot",
+            "description_Thai": "ผู้เล่นทางซ้ายมือ ดื่ม 1 ช็อต",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "",
+            "itemLabel_thai": ""
+        },
+        {
+            "id": "classic-10",
+            "title": "memory-10",
+            "description_Eng": "Right hand player's, take 1 shot",
+            "description_Thai": "ผู้เล่นทางขวามือ ดื่ม 1 ช็อต",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "",
+            "itemLabel_thai": ""
+        },
+        {
+            "id": "classic-J",
+            "title": "memory-J",
+            "description_Eng": "When owner card show the signal, other player must act like owner: slowest take a shot",
+            "description_Thai": "เมื่อเจ้าของไพ่ แสดงท่าทางอย่างเป็นนัยยะ, ผู้เล่นอื่นต้องทำตามเจ้าของไพ่: คนช้าสุด ดื่ม 1 ช็อต",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "J show the acting",
+            "itemLabel_thai": "J ทำท่าทาง"
+        },
+        {
+            "id": "classic-Q",
+            "title": "memory-Q",
+            "description_Eng": "Anyone who mentions, refers to, or identifies the card owner must drink one shot.",
+            "description_Thai": "ใครก็ตามที่พูดถึง, กล่าวถึง, ระบุถึง เจ้าของไพ่, ต้องดื่ม 1 ช็อต",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "Q who metion me, drink 1",
+            "itemLabel_thai": "Q ห้ามคุยด้วย"
+        },
+        {
+            "id": "classic-K",
+            "title": "memory-K",
+            "description_Eng": "The first form specifies what to do, the second form specifies where to do it, the third form specifies how to do it (or how long it will take), and the fourth form indicates the penalty.",
+            "description_Thai": "ใบแรกกำหนดทำอะไร ใบสองกำหนดทำที่ไหน ใบสามกำหนดทำยังไง(หรือนานเท่าไหร่) ใบสี่โดน",
+            "maxCopies": 4,
+            "enabled": true,
+            "hasItem": false, 
+            "itemLabel_eng": "ons of King",
+            "itemLabel_thai": "หนึ่งใน King"
+        }
+    ]
+}
