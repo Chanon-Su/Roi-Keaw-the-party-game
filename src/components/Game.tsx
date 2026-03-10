@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import '../App.css'
 import type { PlayerItem } from '../types/card'
 import logo from '../assets/logo.png'
-import { t, type Language } from '../i18n'
+import { t, type Language, type FlipSpeed, FLIP_SPEED_CONFIG } from '../i18n'
 
 type GameProps = {
     onStart: () => void;
@@ -18,6 +18,7 @@ type GameProps = {
     onOpenSetting: () => void;
     onOpenHowToPlay: () => void;
     language: Language;
+    flipSpeed: FlipSpeed;
 };
 
 function shuffle<T>(array: T[]): T[] {
@@ -40,6 +41,16 @@ export default function Game(props: GameProps) {
         () => Object.fromEntries(props.players.map((_, i) => [i, []]))
     );
 
+    // [Claude] Flip animation state
+    // isFlipped     = ไพ่พลิกอยู่ด้านหน้า (แสดงข้อความ) หรือหลังไพ่
+    // isAnimating   = กำลัง animate อยู่ — ปุ่มจั่วจะ disabled ช่วงนี้
+    // displayCard   = ข้อมูลไพ่ที่แสดงบนหน้าไพ่ (แยกจาก currentCardIndex
+    //                 เพื่อให้อัพเดตได้ตอนไพ่หันหลัง ไม่กระตุก)
+    const [isFlipped, setIsFlipped] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [displayCardIndex, setDisplayCardIndex] = useState<number | null>(null);
+    const [displayPlayerName, setDisplayPlayerName] = useState<string>("");
+
     // [Claude] ดึงข้อมูลไพ่ปัจจุบันจาก index
     const currentCardData = currentCardIndex !== null ? props.deckData[currentCardIndex] : null;
     // แสดงข้อความตามภาษา
@@ -48,17 +59,22 @@ export default function Game(props: GameProps) {
         : null;
 
     function drawCard() {
-        if (isGameOver) return;
+        // [Claude] Guard triple-tap: ถ้ากำลัง animate หรือเกมจบแล้ว ไม่ทำอะไร
+        if (isAnimating || isGameOver) return;
         if (deckIndices.length === 0) { setIsGameOver(true); return; }
 
         const remaining = [...deckIndices];
         const drawnIndex = remaining.pop()!;
         const drawingIndex = currentPlayerIndex;
         const cardData = props.deckData[drawnIndex];
+        const drawingName = props.players[drawingIndex] ?? "";
 
+        // อัพเดต game state ทันที
         setDeckIndices(remaining);
         setNumberCardLeft(remaining.length);
         setCurrentCardIndex(drawnIndex);
+        setCurrentPlayerIndex((prev) => (prev + 1) % props.players.length);
+        if (remaining.length === 0) setIsGameOver(true);
 
         if (cardData?.hasItem) {
             const newItem: PlayerItem = {
@@ -78,8 +94,41 @@ export default function Game(props: GameProps) {
             });
         }
 
-        setCurrentPlayerIndex((prev) => (prev + 1) % props.players.length);
-        if (remaining.length === 0) setIsGameOver(true);
+        // [Claude] Flip animation sequence:
+        //
+        // ถ้าไพ่กำลังหน้าอยู่ (isFlipped = true) → พลิกกลับก่อน (325ms)
+        //   แล้วค่อยอัพเดตข้อความตอนหันหลัง (ผู้เล่นไม่เห็น)
+        //   แล้วพลิกหน้าอีกรอบ
+        //
+        // ถ้าไพ่หันหลังอยู่ (isFlipped = false) → พลิกหน้าเลย
+        //
+        // ทุก sequence ล็อก isAnimating ตลอด จนปลด lock หลังจบ +200ms
+
+        setIsAnimating(true);
+
+        // [Claude] ดึง timing จาก config ตาม flipSpeed ที่ user เลือก
+        const cfg = FLIP_SPEED_CONFIG[props.flipSpeed];
+        const halfFlip = Math.round(cfg.flipDuration * 1000 / 2);
+
+        if (isFlipped) {
+            // 1. พลิกกลับ (หันหลัง)
+            setIsFlipped(false);
+            setTimeout(() => {
+                // 2. สลับข้อความตอนหันหลัง — ผู้เล่นมองไม่เห็น
+                setDisplayCardIndex(drawnIndex);
+                setDisplayPlayerName(drawingName);
+                // 3. พลิกหน้า
+                setIsFlipped(true);
+                // 4. ปลด lock หลัง animation เสร็จ
+                setTimeout(() => setIsAnimating(false), cfg.lockMs);
+            }, halfFlip);
+        } else {
+            // ครั้งแรก หรือหลัง reset — พลิกหน้าเลย
+            setDisplayCardIndex(drawnIndex);
+            setDisplayPlayerName(drawingName);
+            setIsFlipped(true);
+            setTimeout(() => setIsAnimating(false), cfg.lockMs);
+        }
     }
 
     function skipTurn() {
@@ -94,26 +143,28 @@ export default function Game(props: GameProps) {
         setCurrentPlayerIndex(0);
         setIsDrawerOpen(false);
         setPlayerItems(Object.fromEntries(props.players.map((_, i) => [i, []])));
+        // [Claude] reset flip state กลับเป็นหลังไพ่
+        setIsFlipped(false);
+        setIsAnimating(false);
+        setDisplayCardIndex(null);
+        setDisplayPlayerName("");
     }
 
     function handleBackToMenu() {
         props.onStart();
     }
 
-    // [Claude] หลังจาก drawCard() advance turn แล้ว:
-    //   currentPlayerIndex = คนที่กำลังจะจั่วต่อไป
-    //   lastDrawingIndex   = คนที่เพิ่งจั่วไปแล้ว (คำนวณย้อนกลับ)
-    //
-    // ใช้ lastDrawingIndex กับ "ไพ่ของ [ชื่อ]" และ highlight ใน drawer
-    // เพื่อให้ทุกอย่างสอดคล้องกัน: ไพ่ที่แสดง = item ที่เก็บ = กรอบสีส้ม
-
+    // [Claude] lastDrawingIndex ยังคงใช้สำหรับ highlight ใน drawer
     const lastDrawingIndex = currentCardIndex !== null
         ? (currentPlayerIndex - 1 + props.players.length) % props.players.length
         : currentPlayerIndex;
 
-    const lastDrawingName =
-        props.players[lastDrawingIndex] ||
-        `Player ${String.fromCharCode(65 + lastDrawingIndex)}`;
+    // [Claude] displayCard = ข้อมูลที่แสดงบนหน้าไพ่ตอนพลิก
+    // แยกจาก currentCardIndex เพื่อให้สลับข้อความตอนไพ่หันหลัง (ไม่กระตุก)
+    const displayCardData = displayCardIndex !== null ? props.deckData[displayCardIndex] : null;
+    const displayCardText = displayCardData
+        ? (props.language === "th" ? displayCardData.description_Thai : displayCardData.description_Eng)
+        : null;
 
     const nextPlayerName =
         props.players[currentPlayerIndex] ||
@@ -145,23 +196,51 @@ export default function Game(props: GameProps) {
             </div>
 
             {/* ===== PLAY AREA ===== */}
-            <div className="flex-1 p-4 flex flex-col gap-3">
-                <div className="Play_area">
-                    <p className="play-area-label">
-                        {currentCardIndex !== null ? txt.cardOf(lastDrawingName) : "\u00a0"}
-                    </p>
-                    {currentCardIndex !== null ? (
-                        <p className="play-area-card-text">{currentCardText}</p>
-                    ) : (
-                        <p className="play-area-empty">—</p>
-                    )}
-                    {/* [Claude] draw_button แทน full_button — สูง 2.3× สำหรับผู้เล่นที่มึนเมา */}
-                    <button className="draw_button" onClick={drawCard}>
-                        {txt.drawCard}
-                        <span className="draw_button_sub">{txt.drawCardSub}</span>
-                    </button>
+            {/* pb-24 = 96px — เว้นพื้นที่ให้ drawer tab (44px + 20px bottom + buffer) */}
+            <div className="flex-1 p-4 pb-24 flex flex-col gap-3">
+
+                {/* [Claude] 3D Flip Card
+                    โครงสร้าง:
+                      .flip-container  → perspective สำหรับ 3D
+                        .flip-inner    → ตัวที่หมุน (transform: rotateY)
+                          .flip-front  → หลังไพ่ (pattern)
+                          .flip-back   → หน้าไพ่ (ข้อความ)
+                    
+                    isFlipped = true  → rotateY(180deg) → เห็นหน้าไพ่
+                    isFlipped = false → rotateY(0deg)   → เห็นหลังไพ่        */}
+                <div className="flip-container">
+                    <div
+                        className={`flip-inner${isFlipped ? " flipped" : ""}`}
+                        style={{ "--flip-dur": `${FLIP_SPEED_CONFIG[props.flipSpeed].flipDuration}s` } as React.CSSProperties}
+                    >
+
+                        {/* หลังไพ่ */}
+                        <div className="flip-face flip-front Play_area">
+                            <div className="card-back-pattern">
+                                <div className="card-back-center">
+                                    <span className="card-back-logo">RK</span>
+                                </div>
+                            </div>
+                        </div>
+
+                {/* หน้าไพ่ — ข้อความ */}
+                        <div className="flip-face flip-back Play_area">
+                            {/* [Claude] label แสดงชื่อผู้เล่น — ใหญ่ขึ้น + เข้มขึ้น + bold ชื่อ */}
+                            <p className="play-area-label">
+                                {displayPlayerName
+                                    ? <>{txt.cardOfPrefix}<span className="play-area-label-name">{displayPlayerName}</span>{txt.cardOfSuffix}</>
+                                    : "\u00a0"}
+                            </p>
+                            <p className="play-area-card-text">
+                                {displayCardText ?? ""}
+                            </p>
+                        </div>
+
+                    </div>
                 </div>
 
+                {/* [Claude] UX order: อ่านข้อมูล → ตัดสินใจ → กด
+                    card → turn bar → secondary → draw (ล่างสุด = thumb zone) */}
                 <div className="turn-bar">
                     <span className="turn-bar-label">{txt.nextTurn}</span>
                     <span className="turn-bar-name">{nextPlayerName}</span>
@@ -171,6 +250,18 @@ export default function Game(props: GameProps) {
                     <button className="half_button" onClick={props.onOpenHowToPlay}>{txt.howToPlay}</button>
                     <button className="half_button" onClick={skipTurn}>{txt.skipTurn}</button>
                 </div>
+
+                {/* draw button — ล่างสุดเสมอ ห่างจาก drawer tab */}
+                <button
+                    className={`draw_button${isAnimating ? " draw_button--locked" : ""}`}
+                    onClick={drawCard}
+                    disabled={isAnimating}
+                >
+                    {txt.drawCard}
+                    <span className="draw_button_sub">
+                        {isAnimating ? "..." : txt.drawCardSub}
+                    </span>
+                </button>
             </div>
 
             {/* ===== DRAWER BACKDROP ===== */}
@@ -192,7 +283,7 @@ export default function Game(props: GameProps) {
                 <div className="drawer-pill" />
                 <div className="p-4 space-y-4">
 
-                    <p className="text-center font-bold text-lg">{txt.playerInfo}</p>
+                    <p className="drawer-title">{txt.playerInfo}</p>
 
                     <div className="grid grid-cols-2 gap-3">
                         {props.players.map((player, index) => {
@@ -202,11 +293,7 @@ export default function Game(props: GameProps) {
                             return (
                                 <div
                                     key={index}
-                                    className="player-card"
-                                    style={{
-                                        border: isActive ? "2px solid #EEA444" : "1px solid #e0e0e0",
-                                        background: isActive ? "#FFF8EE" : "#f9f9f9",
-                                    }}
+                                    className={`player-card${isActive ? " player-card--active" : ""}`}
                                 >
                                     <p className="player-card-name">{name}</p>
                                     {items.length > 0 ? (
@@ -225,14 +312,11 @@ export default function Game(props: GameProps) {
                         })}
                     </div>
 
-                    <p className="text-center text-sm text-gray-500">{txt.gameEndsWhenDeckEmpty}</p>
+                    <p className="drawer-footer-note">{txt.gameEndsWhenDeckEmpty}</p>
 
                     <div className='flex gap-2'>
-                        <button
-                            className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xl flex-shrink-0"
-                            onClick={props.onOpenSetting}
-                        >⚙️</button>
-                        <button className="full_button" onClick={handleBackToMenu}>{txt.backToMenu}</button>
+                        <button className="btn-icon-header" onClick={props.onOpenSetting}>⚙️</button>
+                        <button className="full_button" style={{marginTop:0, flex:1}} onClick={handleBackToMenu}>{txt.backToMenu}</button>
                     </div>
 
                 </div>

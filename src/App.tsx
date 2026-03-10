@@ -5,7 +5,7 @@ import Menu, { loadPlayers, clearPlayers } from './components/Menu';
 import { SettingPopup, HowToPlayPopup, DeckPopup } from './components/Popups';
 import { ALL_DECKS } from './data/index';
 import type { Deck_type } from './types/card';
-import { loadLanguage, saveLanguage, type Language } from './i18n';
+import { loadLanguage, saveLanguage, type Language, loadFlipSpeed, saveFlipSpeed, type FlipSpeed } from './i18n';
 
 // [Claude] ALL_DECKS มาจาก data/index.ts แล้ว ไม่ต้องประกาศที่นี่
 
@@ -25,6 +25,13 @@ export default function App() {
         if (t === "dark") document.getElementById("root")?.classList.add("dark");
         return t;
     });
+
+    const [flipSpeed, setFlipSpeed] = useState<FlipSpeed>(() => loadFlipSpeed());
+
+    function handleFlipSpeedChange(speed: FlipSpeed) {
+        setFlipSpeed(speed);
+        saveFlipSpeed(speed);
+    }
 
     function handleLanguageChange(lang: Language) {
         setLanguage(lang);
@@ -84,8 +91,10 @@ export default function App() {
                 onClose={() => setIsSettingOpen(false)}
                 language={language}
                 theme={theme}
+                flipSpeed={flipSpeed}
                 onLanguageChange={handleLanguageChange}
                 onThemeChange={handleThemeChange}
+                onFlipSpeedChange={handleFlipSpeedChange}
                 onClearPlayers={() => setPlayers(clearPlayers())}
             />
             <HowToPlayPopup
@@ -124,6 +133,7 @@ export default function App() {
                     onOpenSetting={() => setIsSettingOpen(true)}
                     onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
                     language={language}
+                    flipSpeed={flipSpeed}
                 />
             )}
         </>

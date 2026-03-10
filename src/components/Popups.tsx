@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import '../App.css'
 import type { Deck_type, Card_type } from '../types/card'
-import { t, type Language } from '../i18n'
+import { t, type Language, type FlipSpeed } from '../i18n'
 
 // ==========================================
 // SETTING POPUP
@@ -13,8 +13,10 @@ type SettingPopupProps = {
     onClose: () => void;
     language: Language;
     theme: "light" | "dark";
+    flipSpeed: FlipSpeed;
     onLanguageChange: (lang: Language) => void;
     onThemeChange: (theme: "light" | "dark") => void;
+    onFlipSpeedChange: (speed: FlipSpeed) => void;
     onClearPlayers: () => void;
 };
 
@@ -49,6 +51,16 @@ export function SettingPopup(props: SettingPopupProps) {
                     <div className="setting-toggle-row">
                         <button className={`setting-toggle-btn ${props.theme === "light" ? "active" : ""}`} onClick={() => props.onThemeChange("light")}>{txt.lightTheme}</button>
                         <button className={`setting-toggle-btn ${props.theme === "dark" ? "active" : ""}`} onClick={() => props.onThemeChange("dark")}>{txt.darkTheme}</button>
+                    </div>
+                </div>
+
+                {/* [Claude] ความเร็วการพลิกไพ่ — 3 ระดับ */}
+                <div className="setting-section">
+                    <p className="setting-label">{txt.flipSpeedLabel}</p>
+                    <div className="setting-toggle-row">
+                        <button className={`setting-toggle-btn ${props.flipSpeed === "slow"   ? "active" : ""}`} onClick={() => props.onFlipSpeedChange("slow")}  >{txt.flipSlow}</button>
+                        <button className={`setting-toggle-btn ${props.flipSpeed === "normal" ? "active" : ""}`} onClick={() => props.onFlipSpeedChange("normal")}>{txt.flipNormal}</button>
+                        <button className={`setting-toggle-btn ${props.flipSpeed === "fast"   ? "active" : ""}`} onClick={() => props.onFlipSpeedChange("fast")}  >{txt.flipFast}</button>
                     </div>
                 </div>
 

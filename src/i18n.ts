@@ -40,6 +40,8 @@ export const t = {
         // --- Game ---
         cardsLeft:       (n: number) => `เหลือ ${n} ใบ`,
         cardOf:          (name: string) => `ไพ่ของ ${name} :`,
+        cardOfPrefix:    "ไพ่ของ ",
+        cardOfSuffix:    " :",
         cardOfEmpty:     "ไพ่ของ — :",
         drawCard:        "จั่วไพ่",
         drawCardSub:     "กดเพื่อจั่ว",
@@ -65,6 +67,10 @@ export const t = {
         darkTheme:       "🌙 Dark",
         dataSection:     "ข้อมูล / Data",
         clearPlayers:    "🗑 ล้างชื่อผู้เล่น",
+        flipSpeedLabel:  "ความเร็วการพลิกไพ่",
+        flipSlow:        "🐌 ช้า",
+        flipNormal:      "🐢 ปกติ",
+        flipFast:        "🐇 เร็ว",
         clearConfirm:    "ล้างชื่อผู้เล่นทั้งหมด?",
 
         // --- How to Play popup ---
@@ -97,6 +103,8 @@ export const t = {
         // --- Game ---
         cardsLeft:       (n: number) => `${n} cards left`,
         cardOf:          (name: string) => `${name}'s card :`,
+        cardOfPrefix:    "",
+        cardOfSuffix:    "'s card :",
         cardOfEmpty:     "— 's card :",
         drawCard:        "Draw Card",
         drawCardSub:     "tap to draw",
@@ -122,6 +130,10 @@ export const t = {
         darkTheme:       "🌙 Dark",
         dataSection:     "Data",
         clearPlayers:    "🗑 Clear Players",
+        flipSpeedLabel:  "Card Flip Speed",
+        flipSlow:        "🐌 Slow",
+        flipNormal:      "🐢 Normal",
+        flipFast:        "🐇 Fast",
         clearConfirm:    "Clear all player names?",
 
         // --- How to Play popup ---
@@ -139,3 +151,30 @@ export const t = {
         back:            "← Back",
     },
 } as const;
+
+// ==========================================
+// FLIP SPEED
+// ==========================================
+
+export type FlipSpeed = "slow" | "normal" | "fast";
+
+// [Claude] ค่าจริงที่ใช้ใน CSS transition และ lock ปุ่ม
+// flipDuration = ความเร็วของ CSS rotateY
+// lockMs       = ช่วงที่กดปุ่มจั่วไม่ได้ (flipDuration + buffer)
+export const FLIP_SPEED_CONFIG: Record<FlipSpeed, { flipDuration: number; lockMs: number }> = {
+    slow:   { flipDuration: 0.90, lockMs: 1400 },
+    normal: { flipDuration: 0.65, lockMs: 1000 },  // default
+    fast:   { flipDuration: 0.45, lockMs:  650 },
+};
+
+const FLIP_SPEED_KEY = "cardgame_flip_speed";
+
+export function loadFlipSpeed(): FlipSpeed {
+    const saved = localStorage.getItem(FLIP_SPEED_KEY);
+    if (saved === "slow" || saved === "fast") return saved;
+    return "normal";
+}
+
+export function saveFlipSpeed(speed: FlipSpeed) {
+    localStorage.setItem(FLIP_SPEED_KEY, speed);
+}

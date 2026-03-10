@@ -375,10 +375,20 @@ body {
 
 .play-area-label {
   font-family: var(--ff-b);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--gold);
-  opacity: .85;
+  font-size: 14px;              /* ขึ้นจาก 11px */
+  font-weight: 500;
+  letter-spacing: .3px;
+  color: var(--text-mid);       /* เข้มขึ้น — ใช้ text-mid แทน gold+opacity */
+  opacity: 1;
+}
+
+/* ชื่อผู้เล่นใน label — bold เด่นออกมา เหมือน turn-bar-name */
+.play-area-label-name {
+  font-family: var(--ff-d);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0;
 }
 
 .play-area-card-text {
@@ -683,13 +693,19 @@ body {
   transition: all .2s;
 }
 
-.player-card[style*="border: 2px solid #EEA444"],
-.player-card.active {
-  border-color: var(--player-active-border) !important;
+/* active = คนที่เพิ่งจั่วไพ่ */
+.player-card--active {
+  border: 2px solid var(--player-active-border) !important;
   background: var(--player-active-bg) !important;
+  box-shadow: 0 0 0 2px rgba(200,120,42,.12);
 }
 
-.player-card-name { font-family: var(--ff-d); font-size: 17px; font-weight: 700; color: var(--text-primary); }
+.player-card-name {
+  font-family: var(--ff-d);
+  font-size: 17px; font-weight: 700;
+  color: var(--text-primary);   /* theme-aware — ขาวใน dark, น้ำตาลใน light */
+}
+
 .player-card-items { display: flex; flex-wrap: wrap; gap: 4px; }
 
 .item-tag {
@@ -700,3 +716,117 @@ body {
 }
 
 .player-card-empty { font-size: 16px; color: var(--border-soft); }
+
+/* note เล็กๆ ด้านล่าง drawer */
+.drawer-footer-note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: .3px;
+}
+
+/* ══════════════════════════════════════════
+   3D FLIP CARD ANIMATION
+   ══════════════════════════════════════════ */
+
+/* perspective wrapper — ต้องอยู่นอก flip-inner */
+.flip-container {
+  width: 100%;
+  perspective: 900px;
+}
+
+/* ตัวที่หมุน — preserve-3d สำคัญมาก */
+.flip-inner {
+  width: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  /* [Claude] --flip-dur inject มาจาก Game.tsx style prop
+     ตามค่าใน FLIP_SPEED_CONFIG ที่ user เลือก
+     fallback = 0.65s (normal) กรณี variable ไม่ถูก set  */
+  transition: transform var(--flip-dur, 0.65s) cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 220px;
+}
+
+.flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+/* ── ปุ่ม locked ระหว่าง animation ────────── */
+.draw_button--locked {
+  opacity: 0.70;
+  cursor: not-allowed;
+}
+.draw_button--locked::after {
+  /* ซ่อน shimmer ขณะ locked */
+  opacity: 0;
+}
+
+/* หน้าทั้งสอง — position absolute ซ้อนกัน */
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden; /* Safari */
+  border-radius: var(--r-xl);
+}
+
+/* หลังไพ่ — เห็นตอน isFlipped = false */
+.flip-front {
+  /* ใช้ Play_area styles เป็น base แต่ override padding */
+  padding: 0;
+  overflow: hidden;
+}
+
+/* หน้าไพ่ — เห็นตอน isFlipped = true */
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+/* ── ลายหลังไพ่ ─────────────────────────── */
+.card-back-pattern {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-xl);
+  /* crosshatch pattern */
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(212,135,10,.07) 0px, rgba(212,135,10,.07) 1px,
+      transparent 1px, transparent 12px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(212,135,10,.07) 0px, rgba(212,135,10,.07) 1px,
+      transparent 1px, transparent 12px
+    );
+}
+
+.card-back-center {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(212,135,10,.28);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(var(--surface), 0.6);
+  /* [Claude] ใช้ color แทน background เพื่อให้ theme-aware */
+  background: var(--gold-tint);
+}
+
+.card-back-logo {
+  font-family: var(--ff-d);
+  font-size: 22px; font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1px;
+  opacity: .70;
+}
+
+/* ── DRAW BUTTON LOCKED STATE ───────────── */
+/* [Claude] dim ปุ่มระหว่าง animation — บอกผู้เล่นว่า "รอก่อน" */
+.draw_button--locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.draw_button:disabled {
+  cursor: not-allowed;
+}
