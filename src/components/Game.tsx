@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import '../App.css'
 import type { PlayerItem } from '../types/card'
 import logo from '../assets/logo.png'
@@ -50,13 +50,6 @@ export default function Game(props: GameProps) {
     const [isAnimating, setIsAnimating] = useState(false);
     const [displayCardIndex, setDisplayCardIndex] = useState<number | null>(null);
     const [displayPlayerName, setDisplayPlayerName] = useState<string>("");
-
-    // [Claude] ดึงข้อมูลไพ่ปัจจุบันจาก index
-    const currentCardData = currentCardIndex !== null ? props.deckData[currentCardIndex] : null;
-    // แสดงข้อความตามภาษา
-    const currentCardText = currentCardData
-        ? (props.language === "th" ? currentCardData.description_Thai : currentCardData.description_Eng)
-        : null;
 
     function drawCard() {
         // [Claude] Guard triple-tap: ถ้ากำลัง animate หรือเกมจบแล้ว ไม่ทำอะไร

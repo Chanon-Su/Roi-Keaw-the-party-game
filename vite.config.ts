@@ -8,6 +8,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  base: '/Roi-Keaw-the-party-game',
-  
+  base: '/Roi-Keaw-the-party-game/',
 })
