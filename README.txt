@@ -12,7 +12,6 @@ Deployment
     git add .
     git commit -m "อธิบายสั้นๆ ว่าแก้อะไร เช่น fix card label size"
     git push
-
     # 2. deploy ขึ้น GitHub Pages
     npm run deploy
 
