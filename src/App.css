@@ -849,6 +849,7 @@ body {
   font-family: var(--ff-b);
   font-size: 13px;
   font-weight: 500;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all .15s;
   display: flex;
