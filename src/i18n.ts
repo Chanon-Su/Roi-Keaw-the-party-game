@@ -81,6 +81,9 @@ export const t = {
         clearPlayers:    "🗑 ล้างชื่อผู้เล่น",
         flipSpeedLabel:  "ความเร็วการพลิกไพ่",
         flipSlow:        "🐌 ช้า",
+        showLogLabel:    "ประวัติไพ่",
+        showLogOn:       "เปิด",
+        showLogOff:      "ปิด",
         flipNormal:      "🐢 ปกติ",
         flipFast:        "🐇 เร็ว",
         clearConfirm:    "ล้างชื่อผู้เล่นทั้งหมด?",
@@ -159,6 +162,9 @@ export const t = {
         clearPlayers:    "🗑 Clear Players",
         flipSpeedLabel:  "Card Flip Speed",
         flipSlow:        "🐌 Slow",
+        showLogLabel:    "Card History",
+        showLogOn:       "Show",
+        showLogOff:      "Hide",
         flipNormal:      "🐢 Normal",
         flipFast:        "🐇 Fast",
         clearConfirm:    "Clear all player names?",
@@ -207,6 +213,21 @@ export function loadFlipSpeed(): FlipSpeed {
 
 export function saveFlipSpeed(speed: FlipSpeed) {
     localStorage.setItem(FLIP_SPEED_KEY, speed);
+}
+
+// ==========================================
+// SHOW LOG PREFERENCE
+// ==========================================
+
+const SHOW_LOG_KEY = "cardgame_show_log";
+
+export function loadShowLog(): boolean {
+    const saved = localStorage.getItem(SHOW_LOG_KEY);
+    return saved !== "false"; // default = true
+}
+
+export function saveShowLog(val: boolean) {
+    localStorage.setItem(SHOW_LOG_KEY, String(val));
 }
 
 // ==========================================

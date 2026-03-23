@@ -14,10 +14,12 @@ type SettingPopupProps = {
     language: Language;
     theme: "light" | "dark";
     flipSpeed: FlipSpeed;
-    isInGame: boolean;   // [Claude] ข้อ 11: ซ่อนปุ่มล้างชื่อระหว่างเล่นเกม
+    showLog: boolean;
+    isInGame: boolean;
     onLanguageChange: (lang: Language) => void;
     onThemeChange: (theme: "light" | "dark") => void;
     onFlipSpeedChange: (speed: FlipSpeed) => void;
+    onShowLogChange: (val: boolean) => void;
     onClearPlayers: () => void;
 };
 
@@ -66,6 +68,14 @@ export function SettingPopup(props: SettingPopupProps) {
                         <button className={`setting-toggle-btn ${props.flipSpeed === "slow"   ? "active" : ""}`} onClick={() => props.onFlipSpeedChange("slow")}  >{txt.flipSlow}</button>
                         <button className={`setting-toggle-btn ${props.flipSpeed === "normal" ? "active" : ""}`} onClick={() => props.onFlipSpeedChange("normal")}>{txt.flipNormal}</button>
                         <button className={`setting-toggle-btn ${props.flipSpeed === "fast"   ? "active" : ""}`} onClick={() => props.onFlipSpeedChange("fast")}  >{txt.flipFast}</button>
+                    </div>
+                </div>
+
+                <div className="setting-section">
+                    <p className="setting-label">{txt.showLogLabel}</p>
+                    <div className="setting-toggle-row">
+                        <button className={`setting-toggle-btn ${props.showLog ? "active" : ""}`} onClick={() => props.onShowLogChange(true)}>{txt.showLogOn}</button>
+                        <button className={`setting-toggle-btn ${!props.showLog ? "active" : ""}`} onClick={() => props.onShowLogChange(false)}>{txt.showLogOff}</button>
                     </div>
                 </div>
 

@@ -338,6 +338,33 @@ body {
    GAME — PLAY AREA
    ══════════════════════════════════════════ */
 
+/* [Claude] container หลักของหน้าเกม — fixed height ไม่เลื่อน
+   ใช้ flex column ให้ log ขยายเติมพื้นที่ที่เหลือได้
+   pb-24 = 96px เว้นพื้นที่ drawer tab                        */
+.game-play-area {
+  flex: 1;
+  padding: 16px 16px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;   /* ← ป้องกันหน้าเกมเลื่อน */
+}
+
+/* log area — flex-1 เติมพื้นที่ที่เหลือ scroll ภายใน */
+.game-log-area {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;      /* ← จำเป็นสำหรับ flex child ที่มี overflow */
+}
+
+/* placeholder เมื่อยังไม่มี log — ไม่ใช้พื้นที่ แต่ยัง flex ได้ */
+.game-log-placeholder {
+  flex: 1;
+}
+
 .Play_area {
   background: var(--card-bg);
   border: 2px solid var(--card-border);

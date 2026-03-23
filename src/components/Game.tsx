@@ -23,6 +23,7 @@ type GameProps = {
     savedState: SavedGameState | null;
     onClearSave: () => void;
     selectedDeckId: string;
+    showLog: boolean;
 };
 
 function shuffle<T>(array: T[]): T[] {
@@ -275,24 +276,18 @@ export default function Game(props: GameProps) {
             </div>
 
             {/* ===== PLAY AREA ===== */}
-            {/* pb-24 = 96px — เว้นพื้นที่ให้ drawer tab (44px + 20px bottom + buffer) */}
-            <div className="flex-1 p-4 pb-24 flex flex-col gap-3">
+            {/* ===== PLAY AREA — fixed height ไม่เลื่อน ===== */}
+            {/* [Claude] ใช้ overflow-hidden บน container หลัก
+                log ใช้ flex-1 + overflow-y-auto เติมพื้นที่ที่เหลือ
+                draw button อยู่ล่างสุดเสมอ ไม่ขยับ               */}
+            <div className="game-play-area">
 
-                {/* [Claude] 3D Flip Card
-                    โครงสร้าง:
-                      .flip-container  → perspective สำหรับ 3D
-                        .flip-inner    → ตัวที่หมุน (transform: rotateY)
-                          .flip-front  → หลังไพ่ (pattern)
-                          .flip-back   → หน้าไพ่ (ข้อความ)
-                    
-                    isFlipped = true  → rotateY(180deg) → เห็นหน้าไพ่
-                    isFlipped = false → rotateY(0deg)   → เห็นหลังไพ่        */}
+                {/* Flip Card */}
                 <div className="flip-container">
                     <div
                         className={`flip-inner${isFlipped ? " flipped" : ""}`}
                         style={{ "--flip-dur": `${FLIP_SPEED_CONFIG[props.flipSpeed].flipDuration}s` } as React.CSSProperties}
                     >
-
                         {/* หลังไพ่ */}
                         <div className="flip-face flip-front Play_area">
                             <div className="card-back-pattern">
@@ -302,9 +297,8 @@ export default function Game(props: GameProps) {
                             </div>
                         </div>
 
-                        {/* หน้าไพ่ — ดอกมุม + ชื่อผู้เล่น + ข้อความ */}
+                        {/* หน้าไพ่ */}
                         <div className="flip-face flip-back Play_area">
-                            {/* มุมบนซ้าย */}
                             <div className={`card-suit-corner card-suit-corner--tl suit-color-${displaySuit}`}>
                                 <SuitIcon suit={displaySuit} size={18} />
                             </div>
@@ -316,30 +310,31 @@ export default function Game(props: GameProps) {
                             <p className="play-area-card-text">
                                 {displayCardText ?? ""}
                             </p>
-                            {/* มุมขวาล่าง (กลับด้าน 180°) */}
                             <div className={`card-suit-corner card-suit-corner--br suit-color-${displaySuit}`}>
                                 <SuitIcon suit={displaySuit} size={18} />
                             </div>
                         </div>
-
                     </div>
                 </div>
 
-                {/* [Claude] UX order: card → turn bar → log (กองไพ่) → spacer → draw */}
+                {/* Turn bar */}
                 <div className="turn-bar">
                     <span className="turn-bar-label">{txt.nextTurn}</span>
                     <span className="turn-bar-name">{nextPlayerName}</span>
                 </div>
 
+                {/* Secondary buttons */}
                 <div className="flex gap-3">
                     <button className="half_button" onClick={props.onOpenHowToPlay}>{txt.howToPlay}</button>
                     <button className="half_button" onClick={skipTurn}>{txt.skipTurn}</button>
                 </div>
 
-                {/* Log ประวัติไพ่ — แสดงเหมือนกองไพ่ที่เปิดแล้ว */}
-                {cardLog.length > 0 && (
-                    <div className="card-log-inline">
-                        {cardLog.map((entry, i) => (
+                {/* Log — flex-1 เติมพื้นที่ที่เหลือ scroll ภายใน */}
+                <div className="game-log-area">
+                    {!props.showLog || cardLog.length === 0 ? (
+                        <div className="game-log-placeholder" />
+                    ) : (
+                        cardLog.map((entry, i) => (
                             <div key={i} className="card-log-entry">
                                 <div className="card-log-header">
                                     <span className={`card-log-suit suit-color-${entry.suit}`}>
@@ -350,14 +345,11 @@ export default function Game(props: GameProps) {
                                 </div>
                                 <p className="card-log-text">{entry.cardText}</p>
                             </div>
-                        ))}
-                    </div>
-                )}
+                        ))
+                    )}
+                </div>
 
-                {/* spacer — ดัน draw button ลงล่างเสมอ */}
-                <div style={{ flex: 1 }} />
-
-                {/* draw button */}
+                {/* Draw button — อยู่ล่างสุดเสมอ */}
                 <button
                     className={`draw_button${isAnimating ? " draw_button--locked" : ""}${isLastCardDrawn ? " draw_button--end" : ""}`}
                     onClick={isLastCardDrawn ? () => setIsGameOver(true) : drawCard}
