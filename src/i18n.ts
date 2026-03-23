@@ -200,3 +200,43 @@ export function loadFlipSpeed(): FlipSpeed {
 export function saveFlipSpeed(speed: FlipSpeed) {
     localStorage.setItem(FLIP_SPEED_KEY, speed);
 }
+
+// ==========================================
+// GAME STATE SAVE / LOAD
+// ==========================================
+
+const GAME_STATE_KEY = "cardgame_state";
+
+export type SavedGameState = {
+    deckIndices: number[];
+    currentPlayerIndex: number;
+    playerItems: Record<number, { cardId: string; label_thai: string; label_eng: string }[]>;
+    numberCardLeft: number;
+    displayCardIndex: number | null;
+    displayPlayerName: string;
+    isFlipped: boolean;
+    isLastCardDrawn: boolean;
+    // meta — ตรวจว่า state ยังตรงกับ deck ปัจจุบัน
+    selectedDeckId: string;
+    savedAt: number;   // timestamp
+};
+
+export function saveGameState(state: SavedGameState): void {
+    try {
+        localStorage.setItem(GAME_STATE_KEY, JSON.stringify(state));
+    } catch { /* storage full — ข้ามไป */ }
+}
+
+export function loadGameState(): SavedGameState | null {
+    try {
+        const raw = localStorage.getItem(GAME_STATE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw) as SavedGameState;
+    } catch {
+        return null;
+    }
+}
+
+export function clearGameState(): void {
+    localStorage.removeItem(GAME_STATE_KEY);
+}

@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import '../App.css'
 import type { PlayerItem } from '../types/card'
 import logo from '../assets/logo.png'
-import { t, type Language, type FlipSpeed, FLIP_SPEED_CONFIG } from '../i18n'
+import { t, type Language, type FlipSpeed, FLIP_SPEED_CONFIG, saveGameState, clearGameState, type SavedGameState } from '../i18n'
 
 type GameProps = {
     onStart: () => void;
@@ -19,6 +19,9 @@ type GameProps = {
     onOpenHowToPlay: () => void;
     language: Language;
     flipSpeed: FlipSpeed;
+    savedState: SavedGameState | null;
+    onClearSave: () => void;
+    selectedDeckId: string;
 };
 
 function shuffle<T>(array: T[]): T[] {
@@ -27,33 +30,58 @@ function shuffle<T>(array: T[]): T[] {
 
 export default function Game(props: GameProps) {
 
+    const s = props.savedState; // shorthand
+
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    // [Claude] shuffle index array แทน string array
-    // เพราะ deck ตอนนี้คือ deckData ที่มีทั้งสองภาษา
     const [deckIndices, setDeckIndices] = useState<number[]>(() =>
-        shuffle(props.deckData.map((_, i) => i))
+        s ? s.deckIndices : shuffle(props.deckData.map((_, i) => i))
     );
     const [currentCardIndex, setCurrentCardIndex] = useState<number | null>(null);
-    const [numberCardLeft, setNumberCardLeft] = useState(props.deckData.length);
+    const [numberCardLeft, setNumberCardLeft] = useState(
+        s ? s.numberCardLeft : props.deckData.length
+    );
     const [isGameOver, setIsGameOver] = useState(false);
-    const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-    const [playerItems, setPlayerItems] = useState<Record<number, PlayerItem[]>>(
-        () => Object.fromEntries(props.players.map((_, i) => [i, []]))
+    const [currentPlayerIndex, setCurrentPlayerIndex] = useState(
+        s ? s.currentPlayerIndex : 0
+    );
+    const [playerItems, setPlayerItems] = useState<Record<number, PlayerItem[]>>(() =>
+        s ? s.playerItems : Object.fromEntries(props.players.map((_, i) => [i, []]))
     );
 
-    // [Claude] Flip animation state
-    // isFlipped     = ไพ่พลิกอยู่ด้านหน้า (แสดงข้อความ) หรือหลังไพ่
-    // isAnimating   = กำลัง animate อยู่ — ปุ่มจั่วจะ disabled ช่วงนี้
-    // displayCard   = ข้อมูลไพ่ที่แสดงบนหน้าไพ่ (แยกจาก currentCardIndex
-    //                 เพื่อให้อัพเดตได้ตอนไพ่หันหลัง ไม่กระตุก)
-    const [isFlipped, setIsFlipped] = useState(false);
+    const [isFlipped, setIsFlipped] = useState(s ? s.isFlipped : false);
     const [isAnimating, setIsAnimating] = useState(false);
-    const [displayCardIndex, setDisplayCardIndex] = useState<number | null>(null);
-    const [displayPlayerName, setDisplayPlayerName] = useState<string>("");
-    // [Claude] ข้อ 6: แยก "ไพ่หมด" กับ "popup จบเกม"
-    // isLastCardDrawn = จั่วใบสุดท้ายแล้ว แต่ยังไม่แสดง popup
-    // ผู้เล่นต้องกดปุ่ม "จบเกม" เองเพื่อดู popup
-    const [isLastCardDrawn, setIsLastCardDrawn] = useState(false);
+    const [displayCardIndex, setDisplayCardIndex] = useState<number | null>(
+        s ? s.displayCardIndex : null
+    );
+    const [displayPlayerName, setDisplayPlayerName] = useState<string>(
+        s ? s.displayPlayerName : ""
+    );
+    const [isLastCardDrawn, setIsLastCardDrawn] = useState(
+        s ? s.isLastCardDrawn : false
+    );
+
+    // [Claude] Auto-save game state ทุกครั้งที่ state หลักเปลี่ยน
+    // ทำให้ refresh กลางเกมแล้วกลับมาเล่นต่อได้ทันที
+    useEffect(() => {
+        if (isGameOver) {
+            // เกมจบแล้ว — ล้าง save ออก ไม่ต้องเก็บไว้
+            clearGameState();
+            return;
+        }
+        saveGameState({
+            deckIndices,
+            currentPlayerIndex,
+            playerItems,
+            numberCardLeft,
+            displayCardIndex,
+            displayPlayerName,
+            isFlipped,
+            isLastCardDrawn,
+            selectedDeckId: props.selectedDeckId,
+            savedAt: Date.now(),
+        });
+    }, [deckIndices, currentPlayerIndex, playerItems, numberCardLeft,
+        displayCardIndex, displayPlayerName, isFlipped, isLastCardDrawn, isGameOver]);
 
     function drawCard() {
         // [Claude] Guard triple-tap: ถ้ากำลัง animate หรือเกมจบแล้ว ไม่ทำอะไร
@@ -135,6 +163,7 @@ export default function Game(props: GameProps) {
     }
 
     function handleRestart() {
+        props.onClearSave();   // ล้าง save ก่อน — state ใหม่จะถูก save ใหม่อัตโนมัติ
         setDeckIndices(shuffle(props.deckData.map((_, i) => i)));
         setCurrentCardIndex(null);
         setNumberCardLeft(props.deckData.length);
@@ -142,7 +171,6 @@ export default function Game(props: GameProps) {
         setCurrentPlayerIndex(0);
         setIsDrawerOpen(false);
         setPlayerItems(Object.fromEntries(props.players.map((_, i) => [i, []])));
-        // [Claude] reset flip state กลับเป็นหลังไพ่
         setIsFlipped(false);
         setIsAnimating(false);
         setDisplayCardIndex(null);
@@ -151,7 +179,7 @@ export default function Game(props: GameProps) {
     }
 
     function handleBackToMenu() {
-        props.onStart();
+        props.onStart(); // onStart ใน App.tsx จะ clearGameState() ก่อน setCurrentPage
     }
 
     // [Claude] lastDrawingIndex ยังคงใช้สำหรับ highlight ใน drawer

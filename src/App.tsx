@@ -5,12 +5,17 @@ import Menu, { loadPlayers, clearPlayers } from './components/Menu';
 import { SettingPopup, HowToPlayPopup, DeckPopup } from './components/Popups';
 import { ALL_DECKS } from './data/index';
 import type { Deck_type } from './types/card';
-import { loadLanguage, saveLanguage, type Language, loadFlipSpeed, saveFlipSpeed, type FlipSpeed } from './i18n';
+import { loadLanguage, saveLanguage, type Language, loadFlipSpeed, saveFlipSpeed, type FlipSpeed, loadGameState, clearGameState, type SavedGameState } from './i18n';
 
 // [Claude] ALL_DECKS มาจาก data/index.ts แล้ว ไม่ต้องประกาศที่นี่
 
 export default function App() {
-    const [currentPage, setCurrentPage] = useState("menu");
+    const [currentPage, setCurrentPage] = useState(() => {
+        // [Claude] ถ้ามี saved state → กลับไปหน้าเกมทันที
+        const saved = loadGameState();
+        if (saved) return "game";
+        return "menu";
+    });
     const [players, setPlayers] = useState<string[]>(() => loadPlayers());
 
     const [isSettingOpen, setIsSettingOpen] = useState(false);
@@ -75,6 +80,9 @@ export default function App() {
 
     const activeDeck = ALL_DECKS.find(d => d.id === selectedDeckId) ?? ALL_DECKS[0];
 
+    // [Claude] โหลด saved state ตอน mount — ใช้ restore Game ถ้า refresh กลางเกม
+    const [savedGameState] = useState<SavedGameState | null>(() => loadGameState());
+
     // [Claude] sync theme class กับ #root ทุกครั้งที่เปลี่ยน
     // CSS ใช้ .dark selector เพื่อ switch token ทั้งหมด
     function handleThemeChange(t: "light" | "dark") {
@@ -129,13 +137,16 @@ export default function App() {
 
             {currentPage === "game" && (
                 <Game
-                    onStart={() => setCurrentPage("menu")}
+                    onStart={() => { clearGameState(); setCurrentPage("menu"); }}
                     players={players}
                     deckData={buildDeckData(activeDeck)}
                     onOpenSetting={() => setIsSettingOpen(true)}
                     onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
                     language={language}
                     flipSpeed={flipSpeed}
+                    savedState={savedGameState?.selectedDeckId === activeDeck.id ? savedGameState : null}
+                    onClearSave={clearGameState}
+                    selectedDeckId={activeDeck.id}
                 />
             )}
         </>
