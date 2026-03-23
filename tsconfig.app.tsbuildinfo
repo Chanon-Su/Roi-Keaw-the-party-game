@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/i18n.ts","./src/main.tsx","./src/components/game.tsx","./src/components/menu.tsx","./src/components/popups.tsx","./src/data/index.ts","./src/types/card.ts"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/i18n.ts","./src/main.tsx","./src/components/game.tsx","./src/components/menu.tsx","./src/components/popups.tsx","./src/components/suiticon.tsx","./src/data/index.ts","./src/types/card.ts"],"version":"5.9.3"}

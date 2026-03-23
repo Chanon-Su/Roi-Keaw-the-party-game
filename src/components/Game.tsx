@@ -31,7 +31,6 @@ function shuffle<T>(array: T[]): T[] {
 
 // [Claude] ดอกไพ่ 4 ดอก — ♠♣ dark, ♥♦ red/amber
 const SUITS = ["♠", "♥", "♦", "♣"] as const;
-type Suit = typeof SUITS[number];
 
 // [Claude] Log entry — บันทึกทุกครั้งที่จั่วไพ่
 type CardLogEntry = {
