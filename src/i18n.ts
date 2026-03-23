@@ -44,6 +44,9 @@ export const t = {
         // --- Game ---
         cardsLeft:       (n: number) => `เหลือ ${n} ใบ`,
         fullscreen:      "เต็มจอ",
+        enterFullscreen: "เปิดเต็มจอ",
+        exitFullscreen:  "ออกจากเต็มจอ",
+        viewLog:         "📋 ประวัติไพ่",
         cardOf:          (name: string) => `ไพ่ของ ${name} :`,
         cardOfPrefix:    "ไพ่ของ ",
         cardOfSuffix:    " :",
@@ -126,6 +129,9 @@ export const t = {
         // --- Game ---
         cardsLeft:       (n: number) => `${n} cards left`,
         fullscreen:      "Fullscreen",
+        enterFullscreen: "Enter Fullscreen",
+        exitFullscreen:  "Exit Fullscreen",
+        viewLog:         "📋 Card History",
         cardOf:          (name: string) => `${name}'s card :`,
         cardOfPrefix:    "",
         cardOfSuffix:    "'s card :",
@@ -240,17 +246,19 @@ const GAME_STATE_KEY = "cardgame_state";
 
 export type SavedGameState = {
     deckIndices: number[];
-    cardSuits: string[];             // ดอกไพ่ที่ assign ไว้แล้ว index ตรงกับ deckData
+    cardSuits: string[];
     currentPlayerIndex: number;
     playerItems: Record<number, { cardId: string; label_thai: string; label_eng: string }[]>;
     numberCardLeft: number;
     displayCardIndex: number | null;
     displayPlayerName: string;
-    displaySuit: string;             // ดอกของไพ่ที่แสดงอยู่ตอนนี้
+    displaySuit: string;
     isFlipped: boolean;
     isLastCardDrawn: boolean;
     selectedDeckId: string;
     savedAt: number;
+    // log ประวัติไพ่ — save ไว้ด้วยเพื่อให้ refresh แล้วยังดูได้
+    cardLog: { turn: number; suit: string; playerName: string; cardText: string }[];
 };
 
 export function saveGameState(state: SavedGameState): void {

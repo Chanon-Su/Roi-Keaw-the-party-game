@@ -14,12 +14,10 @@ type SettingPopupProps = {
     language: Language;
     theme: "light" | "dark";
     flipSpeed: FlipSpeed;
-    showLog: boolean;
     isInGame: boolean;
     onLanguageChange: (lang: Language) => void;
     onThemeChange: (theme: "light" | "dark") => void;
     onFlipSpeedChange: (speed: FlipSpeed) => void;
-    onShowLogChange: (val: boolean) => void;
     onClearPlayers: () => void;
 };
 
@@ -27,7 +25,6 @@ export function SettingPopup(props: SettingPopupProps) {
     if (!props.isOpen) return null;
     const txt = t[props.language];
 
-    // [Claude] ข้อ 1: แทน window.confirm ด้วย confirm state ใน component
     const [showClearConfirm, setShowClearConfirm] = useState(false);
 
     function handleClear() {
@@ -71,13 +68,26 @@ export function SettingPopup(props: SettingPopupProps) {
                     </div>
                 </div>
 
-                <div className="setting-section">
-                    <p className="setting-label">{txt.showLogLabel}</p>
-                    <div className="setting-toggle-row">
-                        <button className={`setting-toggle-btn ${props.showLog ? "active" : ""}`} onClick={() => props.onShowLogChange(true)}>{txt.showLogOn}</button>
-                        <button className={`setting-toggle-btn ${!props.showLog ? "active" : ""}`} onClick={() => props.onShowLogChange(false)}>{txt.showLogOff}</button>
+                {/* Fullscreen — แสดงเฉพาะตอนอยู่ในเกม */}
+                {props.isInGame && (
+                    <div className="setting-section">
+                        <p className="setting-label">{txt.fullscreen}</p>
+                        <button
+                            className="setting-toggle-btn active"
+                            style={{ width: "100%" }}
+                            onClick={() => {
+                                if (!document.fullscreenElement) {
+                                    document.documentElement.requestFullscreen?.();
+                                } else {
+                                    document.exitFullscreen?.();
+                                }
+                                props.onClose();
+                            }}
+                        >
+                            ⛶ {document.fullscreenElement ? txt.exitFullscreen : txt.enterFullscreen}
+                        </button>
                     </div>
-                </div>
+                )}
 
                 <div className="setting-divider" />
 

@@ -940,8 +940,15 @@ body {
   gap: 6px;
   max-height: 168px;   /* ~3 entries */
   overflow-y: auto;
-  /* scroll indicator บาง */
   padding-right: 2px;
+}
+
+/* log list ใน popup — ไม่จำกัดความสูง */
+.card-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 
 .card-log-entry {

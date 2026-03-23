@@ -5,7 +5,7 @@ import Menu, { loadPlayers, clearPlayers } from './components/Menu';
 import { SettingPopup, HowToPlayPopup, DeckPopup } from './components/Popups';
 import { ALL_DECKS } from './data/index';
 import type { Deck_type } from './types/card';
-import { loadLanguage, saveLanguage, type Language, loadFlipSpeed, saveFlipSpeed, type FlipSpeed, loadGameState, clearGameState, type SavedGameState, loadShowLog, saveShowLog } from './i18n';
+import { loadLanguage, saveLanguage, type Language, loadFlipSpeed, saveFlipSpeed, type FlipSpeed, loadGameState, clearGameState, type SavedGameState } from './i18n';
 
 // [Claude] ALL_DECKS มาจาก data/index.ts แล้ว ไม่ต้องประกาศที่นี่
 
@@ -36,13 +36,6 @@ export default function App() {
     function handleFlipSpeedChange(speed: FlipSpeed) {
         setFlipSpeed(speed);
         saveFlipSpeed(speed);
-    }
-
-    const [showLog, setShowLog] = useState<boolean>(() => loadShowLog());
-
-    function handleShowLogChange(val: boolean) {
-        setShowLog(val);
-        saveShowLog(val);
     }
 
     function handleLanguageChange(lang: Language) {
@@ -107,12 +100,10 @@ export default function App() {
                 language={language}
                 theme={theme}
                 flipSpeed={flipSpeed}
-                showLog={showLog}
                 isInGame={currentPage === "game"}
                 onLanguageChange={handleLanguageChange}
                 onThemeChange={handleThemeChange}
                 onFlipSpeedChange={handleFlipSpeedChange}
-                onShowLogChange={handleShowLogChange}
                 onClearPlayers={() => setPlayers(clearPlayers())}
             />
             <HowToPlayPopup
@@ -153,7 +144,6 @@ export default function App() {
                     onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
                     language={language}
                     flipSpeed={flipSpeed}
-                    showLog={showLog}
                     savedState={savedGameState?.selectedDeckId === activeDeck.id ? savedGameState : null}
                     onClearSave={clearGameState}
                     selectedDeckId={activeDeck.id}

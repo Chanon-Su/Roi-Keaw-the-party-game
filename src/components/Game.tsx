@@ -23,7 +23,6 @@ type GameProps = {
     savedState: SavedGameState | null;
     onClearSave: () => void;
     selectedDeckId: string;
-    showLog: boolean;
 };
 
 function shuffle<T>(array: T[]): T[] {
@@ -59,6 +58,7 @@ export default function Game(props: GameProps) {
     const s = props.savedState;
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [isLogOpen, setIsLogOpen] = useState(false);
     const [deckIndices, setDeckIndices] = useState<number[]>(() =>
         s ? s.deckIndices : shuffle(props.deckData.map((_, i) => i))
     );
@@ -97,8 +97,10 @@ export default function Game(props: GameProps) {
         s ? s.isLastCardDrawn : false
     );
 
-    // [Claude] Log ประวัติไพ่ — reset ทุกรอบ ไม่ persist ใน localStorage
-    const [cardLog, setCardLog] = useState<CardLogEntry[]>([]);
+    // Log ประวัติไพ่ — restore จาก savedState ถ้ามี
+    const [cardLog, setCardLog] = useState<CardLogEntry[]>(() =>
+        s?.cardLog ?? []
+    );
 
     // [Claude] Auto-save game state ทุกครั้งที่ state หลักเปลี่ยน
     // ทำให้ refresh กลางเกมแล้วกลับมาเล่นต่อได้ทันที
@@ -121,9 +123,10 @@ export default function Game(props: GameProps) {
             isLastCardDrawn,
             selectedDeckId: props.selectedDeckId,
             savedAt: Date.now(),
+            cardLog,
         });
     }, [deckIndices, cardSuits, currentPlayerIndex, playerItems, numberCardLeft,
-        displayCardIndex, displayPlayerName, displaySuit, isFlipped, isLastCardDrawn, isGameOver]);
+        displayCardIndex, displayPlayerName, displaySuit, isFlipped, isLastCardDrawn, isGameOver, cardLog]);
 
     function drawCard() {
         // [Claude] Guard triple-tap: ถ้ากำลัง animate หรือเกมจบแล้ว ไม่ทำอะไร
@@ -228,6 +231,7 @@ export default function Game(props: GameProps) {
         setDisplaySuit("♠");
         setIsLastCardDrawn(false);
         setCardLog([]);
+        setIsLogOpen(false);
     }
 
     function handleBackToMenu() {
@@ -273,21 +277,13 @@ export default function Game(props: GameProps) {
                 <img src={logo} alt="ROI-KAEW" className="app-logo" />
                 <div style={{ flex: 1 }} />
                 <div className="pill-badge">{txt.cardsLeft(numberCardLeft)}</div>
-                {/* [Claude] Fullscreen button — ซ่อน browser bar เพิ่มพื้นที่หน้าจอ */}
+                {/* ⚙️ ย้ายขึ้นมาจาก drawer — ตำแหน่งตรงกับหน้า Menu */}
                 <button
                     className="btn-icon-header"
                     style={{ marginLeft: 8 }}
-                    onClick={() => {
-                        if (!document.fullscreenElement) {
-                            document.documentElement.requestFullscreen?.();
-                        } else {
-                            document.exitFullscreen?.();
-                        }
-                    }}
-                    title={txt.fullscreen}
-                >
-                    ⛶
-                </button>
+                    onClick={props.onOpenSetting}
+                    title={txt.settings}
+                >⚙️</button>
             </div>
 
             {/* ===== PLAY AREA ===== */}
@@ -344,26 +340,10 @@ export default function Game(props: GameProps) {
                     <button className="half_button" onClick={skipTurn}>{txt.skipTurn}</button>
                 </div>
 
-                {/* Log — กรอบคงที่ scroll ภายใน */}
-                <div className={`game-log-area${(!props.showLog || cardLog.length === 0) ? " is-empty" : ""}`}>
-                    {props.showLog && cardLog.map((entry, i) => (
-                        <div key={i} className="card-log-entry">
-                            <div className="card-log-header">
-                                <span className={`card-log-suit suit-color-${entry.suit}`}>
-                                    <SuitIcon suit={entry.suit} size={13} />
-                                </span>
-                                <span className="card-log-turn">{txt.logTurn(entry.turn)}</span>
-                                <span className="card-log-player">{entry.playerName}</span>
-                            </div>
-                            <p className="card-log-text">{entry.cardText}</p>
-                        </div>
-                    ))}
-                </div>
-
-                {/* spacer — ดัน draw button ลงล่างเมื่อ log ว่าง */}
+                {/* spacer — ดัน draw button ลงล่างเสมอ */}
                 <div style={{ flex: 1 }} />
 
-                {/* Draw button — อยู่ล่างสุดเสมอ */}
+                {/* Draw button */}
                 <button
                     className={`draw_button${isAnimating ? " draw_button--locked" : ""}${isLastCardDrawn ? " draw_button--end" : ""}`}
                     onClick={isLastCardDrawn ? () => setIsGameOver(true) : drawCard}
@@ -427,7 +407,7 @@ export default function Game(props: GameProps) {
                     <p className="drawer-footer-note">{txt.gameEndsWhenDeckEmpty}</p>
 
                     <div className="drawer-footer-row">
-                        <button className="drawer-footer-icon-btn" onClick={props.onOpenSetting} title={txt.settings}>⚙️</button>
+                        <button className="drawer-footer-icon-btn" onClick={() => { setIsDrawerOpen(false); setIsLogOpen(true); }} title={txt.viewLog}>📋</button>
                         <button className="drawer-footer-main-btn" onClick={() => setIsDrawerOpen(false)}>
                             {txt.closeDrawer}
                         </button>
@@ -438,6 +418,36 @@ export default function Game(props: GameProps) {
 
                 </div>
             </div>
+
+            {/* ===== LOG POPUP ===== */}
+            {isLogOpen && (
+                <div className="popup-backdrop" onClick={() => setIsLogOpen(false)}>
+                    <div className="popup popup-fullscreen" onClick={e => e.stopPropagation()}>
+                        <button className="popup-close-btn" onClick={() => setIsLogOpen(false)}>✕</button>
+                        <h3 className="popup-title">{txt.viewLog}</h3>
+                        <div className="popup-fullscreen-scroll">
+                            {cardLog.length === 0 ? (
+                                <p style={{ textAlign: "center", color: "var(--text-muted)", padding: "24px 0", fontSize: 14 }}>{txt.logEmpty}</p>
+                            ) : (
+                                <div className="card-log-list">
+                                    {cardLog.map((entry, i) => (
+                                        <div key={i} className="card-log-entry">
+                                            <div className="card-log-header">
+                                                <span className={`card-log-suit suit-color-${entry.suit}`}>
+                                                    <SuitIcon suit={entry.suit} size={14} />
+                                                </span>
+                                                <span className="card-log-turn">{txt.logTurn(entry.turn)}</span>
+                                                <span className="card-log-player">{entry.playerName}</span>
+                                            </div>
+                                            <p className="card-log-text">{entry.cardText}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );
