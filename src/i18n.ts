@@ -43,6 +43,7 @@ export const t = {
 
         // --- Game ---
         cardsLeft:       (n: number) => `เหลือ ${n} ใบ`,
+        fullscreen:      "เต็มจอ",
         cardOf:          (name: string) => `ไพ่ของ ${name} :`,
         cardOfPrefix:    "ไพ่ของ ",
         cardOfSuffix:    " :",
@@ -124,6 +125,7 @@ export const t = {
 
         // --- Game ---
         cardsLeft:       (n: number) => `${n} cards left`,
+        fullscreen:      "Fullscreen",
         cardOf:          (name: string) => `${name}'s card :`,
         cardOfPrefix:    "",
         cardOfSuffix:    "'s card :",

@@ -350,19 +350,28 @@ body {
   overflow: hidden;   /* ← ป้องกันหน้าเกมเลื่อน */
 }
 
-/* log area — flex-1 เติมพื้นที่ที่เหลือ scroll ภายใน */
+/* log area — กรอบคงที่ สูงสุด ~3 entries scroll ภายใน */
 .game-log-area {
-  flex: 1;
+  /* ไม่ใช้ flex:1 — ใช้ max-height แทนเพื่อไม่ให้ยืดดัน draw button */
+  max-height: 172px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 0;      /* ← จำเป็นสำหรับ flex child ที่มี overflow */
+  background: var(--surface);
+  border: 1.5px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 10px;
+  flex-shrink: 0;   /* ไม่ยุบตัวเมื่อพื้นที่น้อย */
 }
 
-/* placeholder เมื่อยังไม่มี log — ไม่ใช้พื้นที่ แต่ยัง flex ได้ */
-.game-log-placeholder {
-  flex: 1;
+/* ซ่อน border เมื่อ log ว่าง */
+.game-log-area.is-empty {
+  max-height: 0;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  overflow: hidden;
 }
 
 .Play_area {
@@ -372,14 +381,64 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 32px 24px;
-  gap: 14px;
+  /* justify-content: space-between ให้ label ติดบน ข้อความอยู่กลาง */
+  justify-content: space-between;
+  padding: 14px 24px 20px;
+  gap: 8px;
   box-shadow: var(--shadow-card);
   min-height: 220px;
   position: relative;
   overflow: hidden;
   transition: background .3s, border-color .3s;
+}
+
+/* label row — ชื่อผู้เล่นอยู่บนสุดเสมอ ไม่ถูกเบียด */
+.play-area-label {
+  font-family: var(--ff-b);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: .3px;
+  color: var(--text-mid);
+  opacity: 1;
+  flex-shrink: 0;    /* ← ไม่ยุบตัว แม้ข้อความไพ่ยาว */
+  text-align: center;
+  width: 100%;
+}
+
+/* ชื่อผู้เล่น bold */
+.play-area-label-name {
+  font-family: var(--ff-d);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0;
+}
+
+/* ข้อความไพ่ — ย่อขนาดได้ถ้ายาวเกิน ไม่ล้นกรอบ */
+.play-area-card-text {
+  font-family: var(--ff-d);
+  /* clamp: ย่อจาก 30px ลงมาถึง 16px ตามพื้นที่ที่มี */
+  font-size: clamp(16px, 5vw, 30px);
+  font-weight: 400;
+  color: var(--card-text);
+  text-align: center;
+  line-height: 1.35;
+  width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  flex: 1;           /* ← ขยายเต็มพื้นที่ที่เหลือ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-area-empty {
+  font-family: var(--ff-d);
+  font-size: 52px; font-style: italic;
+  color: var(--card-empty);
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 /* inner frame */
@@ -397,42 +456,6 @@ body {
   position: absolute; bottom: 14px; right: 18px;
   font-size: 9px; color: var(--card-inner);
   pointer-events: none;
-}
-
-.play-area-label {
-  font-family: var(--ff-b);
-  font-size: 14px;              /* ขึ้นจาก 11px */
-  font-weight: 500;
-  letter-spacing: .3px;
-  color: var(--text-mid);       /* เข้มขึ้น — ใช้ text-mid แทน gold+opacity */
-  opacity: 1;
-}
-
-/* ชื่อผู้เล่นใน label — bold เด่นออกมา เหมือน turn-bar-name */
-.play-area-label-name {
-  font-family: var(--ff-d);
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 0;
-}
-
-.play-area-card-text {
-  font-family: var(--ff-d);
-  font-size: 30px; font-weight: 400;
-  color: var(--card-text);
-  text-align: center;
-  line-height: 1.40;
-  /* ป้องกัน text ล้นกรอบไพ่ */
-  width: 100%;
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-
-.play-area-empty {
-  font-family: var(--ff-d);
-  font-size: 52px; font-style: italic;
-  color: var(--card-empty);
 }
 
 /* ══════════════════════════════════════════

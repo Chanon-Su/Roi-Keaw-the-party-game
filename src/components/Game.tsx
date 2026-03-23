@@ -273,6 +273,21 @@ export default function Game(props: GameProps) {
                 <img src={logo} alt="ROI-KAEW" className="app-logo" />
                 <div style={{ flex: 1 }} />
                 <div className="pill-badge">{txt.cardsLeft(numberCardLeft)}</div>
+                {/* [Claude] Fullscreen button — ซ่อน browser bar เพิ่มพื้นที่หน้าจอ */}
+                <button
+                    className="btn-icon-header"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => {
+                        if (!document.fullscreenElement) {
+                            document.documentElement.requestFullscreen?.();
+                        } else {
+                            document.exitFullscreen?.();
+                        }
+                    }}
+                    title={txt.fullscreen}
+                >
+                    ⛶
+                </button>
             </div>
 
             {/* ===== PLAY AREA ===== */}
@@ -329,25 +344,24 @@ export default function Game(props: GameProps) {
                     <button className="half_button" onClick={skipTurn}>{txt.skipTurn}</button>
                 </div>
 
-                {/* Log — flex-1 เติมพื้นที่ที่เหลือ scroll ภายใน */}
-                <div className="game-log-area">
-                    {!props.showLog || cardLog.length === 0 ? (
-                        <div className="game-log-placeholder" />
-                    ) : (
-                        cardLog.map((entry, i) => (
-                            <div key={i} className="card-log-entry">
-                                <div className="card-log-header">
-                                    <span className={`card-log-suit suit-color-${entry.suit}`}>
-                                        <SuitIcon suit={entry.suit} size={13} />
-                                    </span>
-                                    <span className="card-log-turn">{txt.logTurn(entry.turn)}</span>
-                                    <span className="card-log-player">{entry.playerName}</span>
-                                </div>
-                                <p className="card-log-text">{entry.cardText}</p>
+                {/* Log — กรอบคงที่ scroll ภายใน */}
+                <div className={`game-log-area${(!props.showLog || cardLog.length === 0) ? " is-empty" : ""}`}>
+                    {props.showLog && cardLog.map((entry, i) => (
+                        <div key={i} className="card-log-entry">
+                            <div className="card-log-header">
+                                <span className={`card-log-suit suit-color-${entry.suit}`}>
+                                    <SuitIcon suit={entry.suit} size={13} />
+                                </span>
+                                <span className="card-log-turn">{txt.logTurn(entry.turn)}</span>
+                                <span className="card-log-player">{entry.playerName}</span>
                             </div>
-                        ))
-                    )}
+                            <p className="card-log-text">{entry.cardText}</p>
+                        </div>
+                    ))}
                 </div>
+
+                {/* spacer — ดัน draw button ลงล่างเมื่อ log ว่าง */}
+                <div style={{ flex: 1 }} />
 
                 {/* Draw button — อยู่ล่างสุดเสมอ */}
                 <button
