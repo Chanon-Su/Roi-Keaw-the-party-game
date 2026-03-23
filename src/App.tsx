@@ -5,7 +5,7 @@ import Menu, { loadPlayers, clearPlayers } from './components/Menu';
 import { SettingPopup, HowToPlayPopup, DeckPopup } from './components/Popups';
 import { ALL_DECKS } from './data/index';
 import type { Deck_type } from './types/card';
-import { loadLanguage, saveLanguage, type Language, loadFlipSpeed, saveFlipSpeed, type FlipSpeed, loadGameState, clearGameState, type SavedGameState } from './i18n';
+import { loadLanguage, saveLanguage, type Language, loadFlipSpeed, saveFlipSpeed, type FlipSpeed, loadGameState, clearGameState, type SavedGameState, loadCardCounts, saveCardCounts } from './i18n';
 
 // [Claude] ALL_DECKS มาจาก data/index.ts แล้ว ไม่ต้องประกาศที่นี่
 
@@ -44,10 +44,14 @@ export default function App() {
     }
 
     const [selectedDeckId, setSelectedDeckId] = useState(ALL_DECKS[0].id);
-    const [cardCounts, setCardCounts] = useState<Record<string, number>>({});
+    const [cardCounts, setCardCounts] = useState<Record<string, number>>(() => loadCardCounts());
 
     function handleCardCountChange(cardId: string, count: number) {
-        setCardCounts(prev => ({ ...prev, [cardId]: count }));
+        setCardCounts(prev => {
+            const updated = { ...prev, [cardId]: count };
+            saveCardCounts(updated);
+            return updated;
+        });
     }
 
     // [Claude] รวม buildDeck และ buildDeckData เป็นอันเดียว

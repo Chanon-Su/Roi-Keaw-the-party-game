@@ -224,6 +224,28 @@ export function saveFlipSpeed(speed: FlipSpeed) {
 }
 
 // ==========================================
+// CARD COUNTS (จำนวนไพ่ที่ปรับใน DeckPopup)
+// ==========================================
+
+const CARD_COUNTS_KEY = "cardgame_card_counts";
+
+export function loadCardCounts(): Record<string, number> {
+    try {
+        const raw = localStorage.getItem(CARD_COUNTS_KEY);
+        if (!raw) return {};
+        return JSON.parse(raw) as Record<string, number>;
+    } catch {
+        return {};
+    }
+}
+
+export function saveCardCounts(counts: Record<string, number>): void {
+    try {
+        localStorage.setItem(CARD_COUNTS_KEY, JSON.stringify(counts));
+    } catch { /* storage full */ }
+}
+
+// ==========================================
 // SHOW LOG PREFERENCE
 // ==========================================
 
