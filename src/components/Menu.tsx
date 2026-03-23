@@ -45,6 +45,7 @@ type MenuProps = {
     onOpenHowToPlay: () => void;
     onOpenDeck: () => void;
     language: Language;
+    totalCardCount: number;  // [Claude] ข้อ 12: ตรวจไพ่ขั้นต่ำ
 };
 
 export default function Menu(props: MenuProps) {
@@ -53,9 +54,13 @@ export default function Menu(props: MenuProps) {
     const MIN_PLAYERS = 2;
     const txt = t[props.language]; // [Claude] shorthand — ใช้ txt.xxx แทน t[language].xxx
 
+    const MAX_NAME_LENGTH = 12;
+
     function updatePlayerName(indexToUpdate: number, newName: string) {
+        // จำกัด 12 ตัวอักษร
+        const trimmed = newName.slice(0, MAX_NAME_LENGTH);
         const updatedPlayers = [...props.players];
-        updatedPlayers[indexToUpdate] = newName;
+        updatedPlayers[indexToUpdate] = trimmed;
         props.setPlayers(updatedPlayers);
         savePlayers(updatedPlayers);
     }
@@ -75,6 +80,14 @@ export default function Menu(props: MenuProps) {
     }
 
     const allNamesFilled = props.players.every(name => name.trim() !== "");
+
+    // ตรวจชื่อซ้ำ — เปรียบเทียบแบบ case-insensitive และ trim
+    const filledNames = props.players.map(n => n.trim().toLowerCase()).filter(n => n !== "");
+    const hasDuplicates = filledNames.length !== new Set(filledNames).size;
+
+    const MIN_CARDS = 12;
+    const hasTooFewCards = props.totalCardCount < MIN_CARDS;
+    const canStart = allNamesFilled && !hasDuplicates && !hasTooFewCards;
 
     const playerCountHint = props.players.length >= MAX_PLAYERS
         ? txt.maxPlayersHint(MAX_PLAYERS)
@@ -131,14 +144,20 @@ export default function Menu(props: MenuProps) {
                 <button
                     className="full_button"
                     onClick={props.onStart}
-                    disabled={!allNamesFilled}
-                    style={{ opacity: allNamesFilled ? 1 : 0.4 }}
+                    disabled={!canStart}
+                    style={{ opacity: canStart ? 1 : 0.4 }}
                 >
                     {txt.startGame}
                 </button>
 
                 {!allNamesFilled && (
                     <p className="start-hint">{txt.fillNamesHint}</p>
+                )}
+                {allNamesFilled && hasDuplicates && (
+                    <p className="start-hint">{txt.duplicateNamesHint}</p>
+                )}
+                {allNamesFilled && !hasDuplicates && hasTooFewCards && (
+                    <p className="start-hint">{txt.tooFewCardsHint}</p>
                 )}
             </div>
 

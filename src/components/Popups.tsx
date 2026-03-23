@@ -14,6 +14,7 @@ type SettingPopupProps = {
     language: Language;
     theme: "light" | "dark";
     flipSpeed: FlipSpeed;
+    isInGame: boolean;   // [Claude] ข้อ 11: ซ่อนปุ่มล้างชื่อระหว่างเล่นเกม
     onLanguageChange: (lang: Language) => void;
     onThemeChange: (theme: "light" | "dark") => void;
     onFlipSpeedChange: (speed: FlipSpeed) => void;
@@ -24,18 +25,23 @@ export function SettingPopup(props: SettingPopupProps) {
     if (!props.isOpen) return null;
     const txt = t[props.language];
 
+    // [Claude] ข้อ 1: แทน window.confirm ด้วย confirm state ใน component
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
+
     function handleClear() {
-        const confirmed = window.confirm(txt.clearConfirm);
-        if (confirmed) {
+        if (showClearConfirm) {
             props.onClearPlayers();
             props.onClose();
+            setShowClearConfirm(false);
+        } else {
+            setShowClearConfirm(true);
         }
     }
 
     return (
         <div className="popup-backdrop">
             <div className="popup popup-settings">
-                <button className="popup-close-btn" onClick={props.onClose}>✕</button>
+                <button className="popup-close-btn" onClick={() => { props.onClose(); setShowClearConfirm(false); }}>✕</button>
                 <h3 className="popup-title">{txt.settings}</h3>
 
                 <div className="setting-section">
@@ -54,7 +60,6 @@ export function SettingPopup(props: SettingPopupProps) {
                     </div>
                 </div>
 
-                {/* [Claude] ความเร็วการพลิกไพ่ — 3 ระดับ */}
                 <div className="setting-section">
                     <p className="setting-label">{txt.flipSpeedLabel}</p>
                     <div className="setting-toggle-row">
@@ -66,10 +71,25 @@ export function SettingPopup(props: SettingPopupProps) {
 
                 <div className="setting-divider" />
 
-                <div className="setting-section">
-                    <p className="setting-label">{txt.dataSection}</p>
-                    <button className="setting-clear-btn" onClick={handleClear}>{txt.clearPlayers}</button>
-                </div>
+                {/* [Claude] ข้อ 11: ซ่อนปุ่มล้างชื่อระหว่างเล่นเกม */}
+                {!props.isInGame && (
+                    <div className="setting-section">
+                        <p className="setting-label">{txt.dataSection}</p>
+
+                        {/* [Claude] ข้อ 1: confirm แบบ in-theme — กดครั้งแรก = ถาม, กดครั้งสอง = ยืนยัน */}
+                        {showClearConfirm ? (
+                            <div className="confirm-box">
+                                <p className="confirm-text">{txt.clearConfirm}</p>
+                                <div className="confirm-row">
+                                    <button className="confirm-cancel-btn" onClick={() => setShowClearConfirm(false)}>{txt.cancel}</button>
+                                    <button className="confirm-ok-btn" onClick={handleClear}>{txt.confirmClear}</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <button className="setting-clear-btn" onClick={handleClear}>{txt.clearPlayers}</button>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -126,6 +146,26 @@ export function DeckPopup(props: DeckPopupProps) {
     const [view, setView] = useState<"select" | "edit">("select");
     const [previewDeckId, setPreviewDeckId] = useState(props.selectedDeckId);
     const previewDeck = props.decks.find(d => d.id === previewDeckId);
+
+    // [Claude] ข้อ 14: track ว่ามีการแก้ไขไพ่แล้วหรือยัง
+    // ถ้ายังไม่แก้ → ✕ ปิด popup ทั้งหมด (ข้อ 13)
+    // ถ้าแก้แล้ว → เปลี่ยนเป็น ✓ ยืนยัน
+    const [hasEdited, setHasEdited] = useState(false);
+
+    function handleCardCountChange(cardId: string, count: number) {
+        setHasEdited(true);
+        props.onCardCountChange(cardId, count);
+    }
+
+    function handleConfirm() {
+        setHasEdited(false);
+        setView("select");
+    }
+
+    function handleBack() {
+        setHasEdited(false);
+        setView("select");
+    }
 
     function totalCards(deck: Deck_type): number {
         return deck.cards
@@ -193,13 +233,37 @@ export function DeckPopup(props: DeckPopupProps) {
     return (
         <div className="popup-backdrop">
             <div className="popup popup-fullscreen">
-                <button className="popup-back-btn" onClick={() => setView("select")}>{txt.back}</button>
-                <button className="popup-close-btn" onClick={props.onClose}>✕</button>
+                {/* [Claude] ข้อ 13: ← back = ย้อนหน้า select
+                    ข้อ 14: ✕ → ✓ เมื่อมีการแก้ไข */}
+                <button className="popup-back-btn" onClick={handleBack}>{txt.back}</button>
+                {hasEdited ? (
+                    <button className="popup-confirm-btn" onClick={handleConfirm}>✓ {txt.confirmEdit}</button>
+                ) : (
+                    <button className="popup-close-btn" onClick={props.onClose}>✕</button>
+                )}
 
                 <h3 className="popup-title">🃏 {previewDeck?.name}</h3>
-                <p className="popup-subtitle">{previewDeck ? txt.totalCards(totalCards(previewDeck)) : ""}</p>
 
-                {/* [Claude] คำอธิบาย deck — เปลี่ยนตามภาษา */}
+                {/* จำนวนรวม + คำเตือนขั้นต่ำ */}
+                {previewDeck && (() => {
+                    const MIN_CARDS = 12;
+                    const total = totalCards(previewDeck);
+                    const tooFew = total < MIN_CARDS;
+                    const atMin = total === MIN_CARDS;
+                    return (
+                        <>
+                            <p className={`popup-subtitle ${tooFew ? "popup-subtitle--warn" : ""}`}>
+                                {txt.totalCards(total)}
+                                {tooFew && <span className="deck-min-hint"> — {txt.minCardsHint(MIN_CARDS)}</span>}
+                            </p>
+                            {/* คำเตือนเด่น — แสดงเมื่อถึงขั้นต่ำพอดี */}
+                            {atMin && (
+                                <p className="deck-min-warning">{txt.atMinCardsWarning(MIN_CARDS)}</p>
+                            )}
+                        </>
+                    );
+                })()}
+
                 {previewDeck && (
                     <p className="deck-description-text">
                         {props.language === "th"
@@ -210,41 +274,47 @@ export function DeckPopup(props: DeckPopupProps) {
 
                 <div className="popup-fullscreen-scroll">
                 <div className="card-edit-list">
-                    {previewDeck?.cards.filter(c => c.enabled).map((card: Card_type) => {
-                        const count = props.cardCounts[card.id] ?? card.maxCopies;
-                        return (
-                            <div key={card.id} className="card-edit-row">
-                                <div className="card-edit-info">
-                                    {/* [Claude] แสดงคำอธิบายตามภาษาที่เลือก */}
-                                    <p className="card-edit-name">
-                                        {props.language === "th"
-                                            ? card.description_Thai
-                                            : card.description_Eng}
-                                    </p>
-                                    {/* [Claude] ไม่แสดง hasItem badge — ไม่ให้ผู้เล่นเห็น */}
+                    {previewDeck && (() => {
+                        const MIN_CARDS = 12;
+                        const total = totalCards(previewDeck);
+                        return previewDeck.cards.filter(c => c.enabled).map((card: Card_type) => {
+                            const count = props.cardCounts[card.id] ?? card.maxCopies;
+                            // ล็อคปุ่ม − เมื่อการลดจะทำให้ total < MIN_CARDS
+                            const canDecrease = count > 0 && total > MIN_CARDS;
+                            return (
+                                <div key={card.id} className="card-edit-row">
+                                    <div className="card-edit-info">
+                                        <p className="card-edit-name">
+                                            {props.language === "th"
+                                                ? card.description_Thai
+                                                : card.description_Eng}
+                                        </p>
+                                    </div>
+                                    <div className="card-edit-counter">
+                                        <button
+                                            className="counter-btn"
+                                            onClick={() => handleCardCountChange(card.id, count - 1)}
+                                            disabled={!canDecrease}
+                                        >−</button>
+                                        <span className="counter-num">{count}</span>
+                                        <button
+                                            className="counter-btn"
+                                            onClick={() => handleCardCountChange(card.id, Math.min(card.maxCopies, count + 1))}
+                                            disabled={count === card.maxCopies}
+                                        >+</button>
+                                    </div>
                                 </div>
-                                <div className="card-edit-counter">
-                                    <button
-                                        className="counter-btn"
-                                        onClick={() => props.onCardCountChange(card.id, Math.max(0, count - 1))}
-                                        disabled={count === 0}
-                                    >−</button>
-                                    <span className="counter-num">{count}</span>
-                                    <button
-                                        className="counter-btn"
-                                        onClick={() => props.onCardCountChange(card.id, Math.min(card.maxCopies, count + 1))}
-                                        disabled={count === card.maxCopies}
-                                    >+</button>
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        });
+                    })()}
                 </div>
 
                 <button
                     className="setting-clear-btn"
                     style={{ marginTop: "12px" }}
-                    onClick={() => previewDeck?.cards.forEach(c => props.onCardCountChange(c.id, c.maxCopies))}
+                    onClick={() => {
+                        previewDeck?.cards.forEach(c => handleCardCountChange(c.id, c.maxCopies));
+                    }}
                 >
                     {txt.resetCounts}
                 </button>

@@ -5,7 +5,7 @@
     "deck_description_eng": "The original deck of roi-keaw",
     "cards": [
         {
-            "id": "classic-1",
+            "id": "Roi-keaw-1",
             "title": "shot-1",
             "description_Eng": "Drinks 1 shot",
             "description_Thai": "ดื่ม 1 ช็อต",
@@ -16,7 +16,7 @@
             "itemLabel_thai": ""
         },
         {
-            "id": "classic-2",
+            "id": "Roi-keaw-2",
             "title": "shot-2",
             "description_Eng": "Drinks 2 shot",
             "description_Thai": "ดื่ม 2 ช็อต",
@@ -28,7 +28,7 @@
             
         },
         {
-            "id": "classic-3",
+            "id": "Roi-keaw-3",
             "title": "shot-3",
             "description_Eng": "Drinks 3 shot",
             "description_Thai": "ดื่ม 3 ช็อต",
@@ -39,7 +39,7 @@
             "itemLabel_thai": ""
         },
         {
-            "id": "classic-4",
+            "id": "Roi-keaw-4",
             "title": "shot-4",
             "description_Eng": "Drinks 4 shot",
             "description_Thai": "ดื่ม 4 ช็อต",
@@ -50,7 +50,7 @@
             "itemLabel_thai": ""
         },
         {
-            "id": "classic-5",
+            "id": "Roi-keaw-5",
             "title": "buddy-5",
             "description_Eng": "Pair up with one player; whoever drinks, the other drinks too.",
             "description_Thai": "จับคู่กับ player สักคน;ใครสักคนดื่ม อีกคนดื่มตาม",
@@ -61,7 +61,7 @@
             "itemLabel_thai": "5: มี buddy🤝"
         },
         {
-            "id": "classic-6",
+            "id": "Roi-keaw-6",
             "title": "memory-6",
             "description_Eng": "play the memory game",
             "description_Thai": "เล่นเกมความจำ",
@@ -72,7 +72,7 @@
             "itemLabel_thai": ""
         },
         {
-            "id": "classic-7",
+            "id": "Roi-keaw-7",
             "title": "memory-7",
             "description_Eng": "play the number game",
             "description_Thai": "เล่นเกมไม่นับ 7",
@@ -83,7 +83,7 @@
             "itemLabel_thai": ""
         },
         {
-            "id": "classic-8",
+            "id": "Roi-keaw-8",
             "title": "memory-8",
             "description_Eng": "Tolite card",
             "description_Thai": "ไพ่เข้าห้องน้ำ",
@@ -94,7 +94,7 @@
             "itemLabel_thai": "ทุกคนต้องขออนุญาติฉัน เพื่อไปเข้าห้องน้ำ"
         },
         {
-            "id": "classic-9",
+            "id": "Roi-keaw-9",
             "title": "memory-9",
             "description_Eng": "Left hand player's, take 1 shot",
             "description_Thai": "ผู้เล่นทางซ้ายมือ ดื่ม 1 ช็อต",
@@ -105,7 +105,7 @@
             "itemLabel_thai": ""
         },
         {
-            "id": "classic-10",
+            "id": "Roi-keaw-10",
             "title": "memory-10",
             "description_Eng": "Right hand player's, take 1 shot",
             "description_Thai": "ผู้เล่นทางขวามือ ดื่ม 1 ช็อต",
@@ -116,7 +116,7 @@
             "itemLabel_thai": ""
         },
         {
-            "id": "classic-J",
+            "id": "Roi-keaw-J",
             "title": "memory-J",
             "description_Eng": "When owner card show the signal, other player must act like owner: slowest take a shot",
             "description_Thai": "เมื่อเจ้าของไพ่ แสดงท่าทางอย่างเป็นนัยยะ, ผู้เล่นอื่นต้องทำตามเจ้าของไพ่: คนช้าสุด ดื่ม 1 ช็อต",
@@ -127,7 +127,7 @@
             "itemLabel_thai": "J ทำท่าทาง"
         },
         {
-            "id": "classic-Q",
+            "id": "Roi-keaw-Q",
             "title": "memory-Q",
             "description_Eng": "Anyone who mentions, refers to, or identifies the card owner must drink one shot.",
             "description_Thai": "ใครก็ตามที่พูดถึง, กล่าวถึง, ระบุถึง เจ้าของไพ่, ต้องดื่ม 1 ช็อต",
@@ -138,7 +138,7 @@
             "itemLabel_thai": "Q ห้ามคุยกันฉันนะ"
         },
         {
-            "id": "classic-K1",
+            "id": "Roi-keaw-K1",
             "title": "memory-K1",
             "description_Eng": "The first specifies what K4 to do",
             "description_Thai": "King คนแรก กำหนดให้ K4 ต้องทำอะไร",
@@ -149,7 +149,7 @@
             "itemLabel_thai": "King 1"
         },
         {
-            "id": "classic-K2",
+            "id": "Roi-keaw-K2",
             "title": "memory-K2",
             "description_Eng": "The second specifies where K4 to do it",
             "description_Thai": "King คนแรก กำหนดให้ K4 ต้องทำที่ไหน",
@@ -160,7 +160,7 @@
             "itemLabel_thai": "King 2"
         },
         {
-            "id": "classic-K3",
+            "id": "Roi-keaw-K3",
             "title": "memory-K3",
             "description_Eng": "The third form specifies how long K4 to do it",
             "description_Thai": "King คนแรก กำหนดให้ K4 ต้องทำนานเท่าไหร่",
@@ -171,7 +171,7 @@
             "itemLabel_thai": "King 3"
         },
         {
-            "id": "classic-K4",
+            "id": "Roi-keaw-K4",
             "title": "memory-K4",
             "description_Eng": "the King fourth take the penalty but if you win the rock paper scisor with King 1-3, them gonna take the penalty with you",
             "description_Thai": "King 4 รับบทลงโทษ แต่ถ้า เป้ายิ้งฉุบชนะ King 1-3 คนนั้นต้องมารับบทลงโทษพร้อมคุณด้วย",

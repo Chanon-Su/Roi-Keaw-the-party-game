@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import '../App.css'
 import type { PlayerItem } from '../types/card'
 import logo from '../assets/logo.png'
@@ -50,6 +50,10 @@ export default function Game(props: GameProps) {
     const [isAnimating, setIsAnimating] = useState(false);
     const [displayCardIndex, setDisplayCardIndex] = useState<number | null>(null);
     const [displayPlayerName, setDisplayPlayerName] = useState<string>("");
+    // [Claude] ข้อ 6: แยก "ไพ่หมด" กับ "popup จบเกม"
+    // isLastCardDrawn = จั่วใบสุดท้ายแล้ว แต่ยังไม่แสดง popup
+    // ผู้เล่นต้องกดปุ่ม "จบเกม" เองเพื่อดู popup
+    const [isLastCardDrawn, setIsLastCardDrawn] = useState(false);
 
     function drawCard() {
         // [Claude] Guard triple-tap: ถ้ากำลัง animate หรือเกมจบแล้ว ไม่ทำอะไร
@@ -67,7 +71,9 @@ export default function Game(props: GameProps) {
         setNumberCardLeft(remaining.length);
         setCurrentCardIndex(drawnIndex);
         setCurrentPlayerIndex((prev) => (prev + 1) % props.players.length);
-        if (remaining.length === 0) setIsGameOver(true);
+        // [Claude] ข้อ 6: ถ้าไพ่หมด → set isLastCardDrawn แทน isGameOver
+        // ผู้เล่นจะเห็นไพ่ใบสุดท้ายก่อน แล้วค่อยกด "จบเกม" เอง
+        if (remaining.length === 0) setIsLastCardDrawn(true);
 
         if (cardData?.hasItem) {
             const newItem: PlayerItem = {
@@ -141,6 +147,7 @@ export default function Game(props: GameProps) {
         setIsAnimating(false);
         setDisplayCardIndex(null);
         setDisplayPlayerName("");
+        setIsLastCardDrawn(false);
     }
 
     function handleBackToMenu() {
@@ -244,15 +251,18 @@ export default function Game(props: GameProps) {
                     <button className="half_button" onClick={skipTurn}>{txt.skipTurn}</button>
                 </div>
 
-                {/* draw button — ล่างสุดเสมอ ห่างจาก drawer tab */}
+                {/* spacer — ดัน draw button ลงล่างเสมอ ไม่ว่าจอจะสูงแค่ไหน */}
+                <div style={{ flex: 1 }} />
+
+                {/* draw button — เปลี่ยนเป็น "จบเกม" เมื่อจั่วใบสุดท้ายแล้ว */}
                 <button
-                    className={`draw_button${isAnimating ? " draw_button--locked" : ""}`}
-                    onClick={drawCard}
+                    className={`draw_button${isAnimating ? " draw_button--locked" : ""}${isLastCardDrawn ? " draw_button--end" : ""}`}
+                    onClick={isLastCardDrawn ? () => setIsGameOver(true) : drawCard}
                     disabled={isAnimating}
                 >
-                    {txt.drawCard}
+                    {isLastCardDrawn ? txt.endGame : txt.drawCard}
                     <span className="draw_button_sub">
-                        {isAnimating ? "..." : txt.drawCardSub}
+                        {isLastCardDrawn ? txt.endGameSub : isAnimating ? "..." : txt.drawCardSub}
                     </span>
                 </button>
             </div>
@@ -307,9 +317,15 @@ export default function Game(props: GameProps) {
 
                     <p className="drawer-footer-note">{txt.gameEndsWhenDeckEmpty}</p>
 
-                    <div className='flex gap-2'>
-                        <button className="btn-icon-header" onClick={props.onOpenSetting}>⚙️</button>
-                        <button className="full_button" style={{marginTop:0, flex:1}} onClick={handleBackToMenu}>{txt.backToMenu}</button>
+                    {/* [Claude] ⚙️(สั้น) | ✕ กลับเกม(ยาว) | 🚪 ออกเกม(สั้น แดง) */}
+                    <div className="drawer-footer-row">
+                        <button className="drawer-footer-icon-btn" onClick={props.onOpenSetting} title={txt.settings}>⚙️</button>
+                        <button className="drawer-footer-main-btn" onClick={() => setIsDrawerOpen(false)}>
+                            {txt.closeDrawer}
+                        </button>
+                        <button className="drawer-footer-icon-btn drawer-footer-icon-btn--exit" onClick={handleBackToMenu} title={txt.exitGame}>
+                            🚪
+                        </button>
                     </div>
 
                 </div>

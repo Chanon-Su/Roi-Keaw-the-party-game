@@ -35,6 +35,10 @@ export const t = {
         maxPlayersHint:  (n: number) => `ผู้เล่นสูงสุด ${n} คนแล้ว`,
         minPlayersHint:  (n: number) => `ผู้เล่นขั้นต่ำ ${n} คน`,
         fillNamesHint:   "* กรุณากรอกชื่อผู้เล่นให้ครบทุกคนก่อนเริ่ม",
+        duplicateNamesHint: "* ชื่อผู้เล่นซ้ำกัน กรุณาใช้ชื่อที่ต่างกัน",
+        tooFewCardsHint: "* ไพ่น้อยเกินไป — กดปุ่ม 🃏 สำรับ เพื่อเพิ่มไพ่",
+        minCardsHint:    (n: number) => `ต้องมีอย่างน้อย ${n} ใบ`,
+        atMinCardsWarning: (n: number) => `🔒 ถึงจำนวนขั้นต่ำ ${n} ใบแล้ว — ปุ่มลดถูกล็อค`,
         footer:          "Terms of service · Privacy · Contact us",
 
         // --- Game ---
@@ -45,11 +49,15 @@ export const t = {
         cardOfEmpty:     "ไพ่ของ — :",
         drawCard:        "จั่วไพ่",
         drawCardSub:     "กดเพื่อจั่ว",
+        endGame:         "จบเกม",
+        endGameSub:      "ไพ่หมดแล้ว — กดเพื่อจบ",
         nextTurn:        "ตาถัดไปคือตาของ :",
         skipTurn:        "⏭ ข้ามตา",
         playerInfo:      "ข้อมูลผู้เล่น",
         gameEndsWhenDeckEmpty: "เกมจบเมื่อไพ่หมด",
         backToMenu:      "← กลับหน้าหลัก",
+        exitGame:        "ออกจากเกม",
+        closeDrawer:     "↩ กลับไปเล่น",
 
         // --- Game Over popup ---
         gameOver:        "Game Over",
@@ -72,6 +80,8 @@ export const t = {
         flipNormal:      "🐢 ปกติ",
         flipFast:        "🐇 เร็ว",
         clearConfirm:    "ล้างชื่อผู้เล่นทั้งหมด?",
+        cancel:          "ยกเลิก",
+        confirmClear:    "ล้างเลย",
 
         // --- How to Play popup ---
         howToPlayTitle:  "📖 วิธีเล่น",
@@ -84,6 +94,7 @@ export const t = {
         deckSelected:    "✓ กำลังใช้อยู่",
         totalCards:      (n: number) => `${n} ใบรวม`,
         resetCounts:     "🔄 รีเซ็ตจำนวนทั้งหมด",
+        confirmEdit:     "บันทึก",
         hasItem:         "📌 มี item",
         back:            "← กลับ",
     },
@@ -98,6 +109,10 @@ export const t = {
         maxPlayersHint:  (n: number) => `Maximum ${n} players reached`,
         minPlayersHint:  (n: number) => `Minimum ${n} players`,
         fillNamesHint:   "* Please fill in all player names before starting",
+        duplicateNamesHint: "* Duplicate names — please use unique names",
+        tooFewCardsHint: "* Not enough cards — tap 🃏 Deck to add more",
+        minCardsHint:    (n: number) => `need at least ${n} cards`,
+        atMinCardsWarning: (n: number) => `🔒 Minimum ${n} cards reached — decrease locked`,
         footer:          "Terms of service · Privacy · Contact us",
 
         // --- Game ---
@@ -108,11 +123,15 @@ export const t = {
         cardOfEmpty:     "— 's card :",
         drawCard:        "Draw Card",
         drawCardSub:     "tap to draw",
+        endGame:         "End Game",
+        endGameSub:      "Deck empty — tap to finish",
         nextTurn:        "Next up :",
         skipTurn:        "⏭ Skip Turn",
         playerInfo:      "Player Info",
         gameEndsWhenDeckEmpty: "Game ends when deck runs out",
         backToMenu:      "← Back to Menu",
+        exitGame:        "Exit Game",
+        closeDrawer:     "↩ Back to Game",
 
         // --- Game Over popup ---
         gameOver:        "Game Over",
@@ -135,6 +154,8 @@ export const t = {
         flipNormal:      "🐢 Normal",
         flipFast:        "🐇 Fast",
         clearConfirm:    "Clear all player names?",
+        cancel:          "Cancel",
+        confirmClear:    "Clear",
 
         // --- How to Play popup ---
         howToPlayTitle:  "📖 How to Play",
@@ -147,6 +168,7 @@ export const t = {
         deckSelected:    "✓ Selected",
         totalCards:      (n: number) => `${n} cards total`,
         resetCounts:     "🔄 Reset all counts",
+        confirmEdit:     "Save",
         hasItem:         "📌 Has item",
         back:            "← Back",
     },

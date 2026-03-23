@@ -92,6 +92,7 @@ export default function App() {
                 language={language}
                 theme={theme}
                 flipSpeed={flipSpeed}
+                isInGame={currentPage === "game"}
                 onLanguageChange={handleLanguageChange}
                 onThemeChange={handleThemeChange}
                 onFlipSpeedChange={handleFlipSpeedChange}
@@ -122,6 +123,7 @@ export default function App() {
                     onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
                     onOpenDeck={() => setIsDeckOpen(true)}
                     language={language}
+                    totalCardCount={buildDeckData(activeDeck).length}
                 />
             )}
 
