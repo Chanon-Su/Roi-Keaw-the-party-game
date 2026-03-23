@@ -3,6 +3,7 @@ import '../App.css'
 import type { PlayerItem } from '../types/card'
 import logo from '../assets/logo.png'
 import { t, type Language, type FlipSpeed, FLIP_SPEED_CONFIG, saveGameState, clearGameState, type SavedGameState } from '../i18n'
+import SuitIcon from './SuitIcon'
 
 type GameProps = {
     onStart: () => void;
@@ -28,14 +29,46 @@ function shuffle<T>(array: T[]): T[] {
     return [...array].sort(() => Math.random() - 0.5);
 }
 
+// [Claude] ดอกไพ่ 4 ดอก — ♠♣ dark, ♥♦ red/amber
+const SUITS = ["♠", "♥", "♦", "♣"] as const;
+type Suit = typeof SUITS[number];
+
+// [Claude] Log entry — บันทึกทุกครั้งที่จั่วไพ่
+type CardLogEntry = {
+    turn: number;        // ใบที่
+    suit: string;        // ดอก
+    playerName: string;  // ชื่อผู้เล่น
+    cardText: string;    // ข้อความไพ่
+};
+
+// สร้าง suit array ขนาดเท่า deckData
+// ไพ่ที่มี maxCopies=4 จะได้ครบทั้ง 4 ดอก ไม่ซ้ำกัน
+// ไพ่ที่มี maxCopies<4 จะสุ่มเลือกจาก 4 ดอก
+function assignSuits(deckData: { cardId: string }[]): string[] {
+    // นับว่าแต่ละ cardId ถูกใช้ไปกี่ครั้งแล้ว
+    const countPerCard: Record<string, number> = {};
+    return deckData.map(card => {
+        const used = countPerCard[card.cardId] ?? 0;
+        countPerCard[card.cardId] = used + 1;
+        return SUITS[used % 4];
+    });
+}
+
 export default function Game(props: GameProps) {
 
-    const s = props.savedState; // shorthand
+    const s = props.savedState;
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [deckIndices, setDeckIndices] = useState<number[]>(() =>
         s ? s.deckIndices : shuffle(props.deckData.map((_, i) => i))
     );
+
+    // [Claude] assign ดอกให้ทุก slot ตอนเริ่มเกม — index ตรงกับ deckData
+    // restore จาก savedState ถ้า refresh กลางเกม
+    const [cardSuits] = useState<string[]>(() =>
+        s ? s.cardSuits : assignSuits(props.deckData)
+    );
+
     const [currentCardIndex, setCurrentCardIndex] = useState<number | null>(null);
     const [numberCardLeft, setNumberCardLeft] = useState(
         s ? s.numberCardLeft : props.deckData.length
@@ -56,9 +89,16 @@ export default function Game(props: GameProps) {
     const [displayPlayerName, setDisplayPlayerName] = useState<string>(
         s ? s.displayPlayerName : ""
     );
+    // ดอกของไพ่ที่แสดงอยู่ตอนนี้
+    const [displaySuit, setDisplaySuit] = useState<string>(
+        s ? s.displaySuit : "♠"
+    );
     const [isLastCardDrawn, setIsLastCardDrawn] = useState(
         s ? s.isLastCardDrawn : false
     );
+
+    // [Claude] Log ประวัติไพ่ — reset ทุกรอบ ไม่ persist ใน localStorage
+    const [cardLog, setCardLog] = useState<CardLogEntry[]>([]);
 
     // [Claude] Auto-save game state ทุกครั้งที่ state หลักเปลี่ยน
     // ทำให้ refresh กลางเกมแล้วกลับมาเล่นต่อได้ทันที
@@ -70,18 +110,20 @@ export default function Game(props: GameProps) {
         }
         saveGameState({
             deckIndices,
+            cardSuits,
             currentPlayerIndex,
             playerItems,
             numberCardLeft,
             displayCardIndex,
             displayPlayerName,
+            displaySuit,
             isFlipped,
             isLastCardDrawn,
             selectedDeckId: props.selectedDeckId,
             savedAt: Date.now(),
         });
-    }, [deckIndices, currentPlayerIndex, playerItems, numberCardLeft,
-        displayCardIndex, displayPlayerName, isFlipped, isLastCardDrawn, isGameOver]);
+    }, [deckIndices, cardSuits, currentPlayerIndex, playerItems, numberCardLeft,
+        displayCardIndex, displayPlayerName, displaySuit, isFlipped, isLastCardDrawn, isGameOver]);
 
     function drawCard() {
         // [Claude] Guard triple-tap: ถ้ากำลัง animate หรือเกมจบแล้ว ไม่ทำอะไร
@@ -131,28 +173,36 @@ export default function Game(props: GameProps) {
         //
         // ทุก sequence ล็อก isAnimating ตลอด จนปลด lock หลังจบ +200ms
 
+        // [Claude] เพิ่ม log entry — บันทึกทุกครั้งที่จั่ว
+        const drawnSuit = cardSuits[drawnIndex] ?? "♠";
+        const drawnText = props.language === "th"
+            ? cardData.description_Thai
+            : cardData.description_Eng;
+        setCardLog(prev => [{
+            turn: props.deckData.length - remaining.length,
+            suit: drawnSuit,
+            playerName: drawingName,
+            cardText: drawnText,
+        }, ...prev]); // prepend — ใหม่อยู่บน
+
         setIsAnimating(true);
 
-        // [Claude] ดึง timing จาก config ตาม flipSpeed ที่ user เลือก
         const cfg = FLIP_SPEED_CONFIG[props.flipSpeed];
         const halfFlip = Math.round(cfg.flipDuration * 1000 / 2);
 
         if (isFlipped) {
-            // 1. พลิกกลับ (หันหลัง)
             setIsFlipped(false);
             setTimeout(() => {
-                // 2. สลับข้อความตอนหันหลัง — ผู้เล่นมองไม่เห็น
                 setDisplayCardIndex(drawnIndex);
                 setDisplayPlayerName(drawingName);
-                // 3. พลิกหน้า
+                setDisplaySuit(drawnSuit);
                 setIsFlipped(true);
-                // 4. ปลด lock หลัง animation เสร็จ
                 setTimeout(() => setIsAnimating(false), cfg.lockMs);
             }, halfFlip);
         } else {
-            // ครั้งแรก หรือหลัง reset — พลิกหน้าเลย
             setDisplayCardIndex(drawnIndex);
             setDisplayPlayerName(drawingName);
+            setDisplaySuit(drawnSuit);
             setIsFlipped(true);
             setTimeout(() => setIsAnimating(false), cfg.lockMs);
         }
@@ -175,7 +225,9 @@ export default function Game(props: GameProps) {
         setIsAnimating(false);
         setDisplayCardIndex(null);
         setDisplayPlayerName("");
+        setDisplaySuit("♠");
         setIsLastCardDrawn(false);
+        setCardLog([]);
     }
 
     function handleBackToMenu() {
@@ -251,9 +303,12 @@ export default function Game(props: GameProps) {
                             </div>
                         </div>
 
-                {/* หน้าไพ่ — ข้อความ */}
+                        {/* หน้าไพ่ — ดอกมุม + ชื่อผู้เล่น + ข้อความ */}
                         <div className="flip-face flip-back Play_area">
-                            {/* [Claude] label แสดงชื่อผู้เล่น — ใหญ่ขึ้น + เข้มขึ้น + bold ชื่อ */}
+                            {/* มุมบนซ้าย */}
+                            <div className={`card-suit-corner card-suit-corner--tl suit-color-${displaySuit}`}>
+                                <SuitIcon suit={displaySuit} size={18} />
+                            </div>
                             <p className="play-area-label">
                                 {displayPlayerName
                                     ? <>{txt.cardOfPrefix}<span className="play-area-label-name">{displayPlayerName}</span>{txt.cardOfSuffix}</>
@@ -262,13 +317,16 @@ export default function Game(props: GameProps) {
                             <p className="play-area-card-text">
                                 {displayCardText ?? ""}
                             </p>
+                            {/* มุมขวาล่าง (กลับด้าน 180°) */}
+                            <div className={`card-suit-corner card-suit-corner--br suit-color-${displaySuit}`}>
+                                <SuitIcon suit={displaySuit} size={18} />
+                            </div>
                         </div>
 
                     </div>
                 </div>
 
-                {/* [Claude] UX order: อ่านข้อมูล → ตัดสินใจ → กด
-                    card → turn bar → secondary → draw (ล่างสุด = thumb zone) */}
+                {/* [Claude] UX order: card → turn bar → log (กองไพ่) → spacer → draw */}
                 <div className="turn-bar">
                     <span className="turn-bar-label">{txt.nextTurn}</span>
                     <span className="turn-bar-name">{nextPlayerName}</span>
@@ -279,10 +337,28 @@ export default function Game(props: GameProps) {
                     <button className="half_button" onClick={skipTurn}>{txt.skipTurn}</button>
                 </div>
 
-                {/* spacer — ดัน draw button ลงล่างเสมอ ไม่ว่าจอจะสูงแค่ไหน */}
+                {/* Log ประวัติไพ่ — แสดงเหมือนกองไพ่ที่เปิดแล้ว */}
+                {cardLog.length > 0 && (
+                    <div className="card-log-inline">
+                        {cardLog.map((entry, i) => (
+                            <div key={i} className="card-log-entry">
+                                <div className="card-log-header">
+                                    <span className={`card-log-suit suit-color-${entry.suit}`}>
+                                        <SuitIcon suit={entry.suit} size={13} />
+                                    </span>
+                                    <span className="card-log-turn">{txt.logTurn(entry.turn)}</span>
+                                    <span className="card-log-player">{entry.playerName}</span>
+                                </div>
+                                <p className="card-log-text">{entry.cardText}</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* spacer — ดัน draw button ลงล่างเสมอ */}
                 <div style={{ flex: 1 }} />
 
-                {/* draw button — เปลี่ยนเป็น "จบเกม" เมื่อจั่วใบสุดท้ายแล้ว */}
+                {/* draw button */}
                 <button
                     className={`draw_button${isAnimating ? " draw_button--locked" : ""}${isLastCardDrawn ? " draw_button--end" : ""}`}
                     onClick={isLastCardDrawn ? () => setIsGameOver(true) : drawCard}
@@ -312,7 +388,7 @@ export default function Game(props: GameProps) {
             {/* ===== DRAWER PANEL ===== */}
             <div className={`drawer-panel ${isDrawerOpen ? "open" : ""}`}>
                 <div className="drawer-pill" />
-                <div className="p-4 space-y-4">
+                <div className="p-4 space-y-3">
 
                     <p className="drawer-title">{txt.playerInfo}</p>
 
@@ -345,7 +421,6 @@ export default function Game(props: GameProps) {
 
                     <p className="drawer-footer-note">{txt.gameEndsWhenDeckEmpty}</p>
 
-                    {/* [Claude] ⚙️(สั้น) | ✕ กลับเกม(ยาว) | 🚪 ออกเกม(สั้น แดง) */}
                     <div className="drawer-footer-row">
                         <button className="drawer-footer-icon-btn" onClick={props.onOpenSetting} title={txt.settings}>⚙️</button>
                         <button className="drawer-footer-main-btn" onClick={() => setIsDrawerOpen(false)}>

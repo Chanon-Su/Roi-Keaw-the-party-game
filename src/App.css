@@ -828,6 +828,120 @@ body {
   letter-spacing: .3px;
 }
 
+/* ══════════════════════════════════════════
+   DRAWER TAB BAR
+   ══════════════════════════════════════════ */
+
+.drawer-tab-bar {
+  display: flex;
+  gap: 6px;
+  background: var(--bg);
+  border-radius: var(--r-md);
+  padding: 4px;
+}
+
+.drawer-tab-btn {
+  flex: 1;
+  height: 36px;
+  border-radius: calc(var(--r-md) - 2px);
+  border: none;
+  background: transparent;
+  font-family: var(--ff-b);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.drawer-tab-btn.active {
+  background: var(--surface);
+  color: var(--text-primary);
+  font-weight: 700;
+  box-shadow: var(--shadow-card);
+}
+
+.drawer-tab-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: var(--gold);
+  color: var(--text-on-cta);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ══════════════════════════════════════════
+   CARD LOG — แสดงในหน้าเกมหลัก เหมือนกองไพ่
+   ══════════════════════════════════════════ */
+
+/* wrapper — scroll ได้ max 3 entries พอดี */
+.card-log-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 168px;   /* ~3 entries */
+  overflow-y: auto;
+  /* scroll indicator บาง */
+  padding-right: 2px;
+}
+
+.card-log-entry {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.card-log-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-log-suit {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.card-log-turn {
+  font-family: var(--ff-b);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: .5px;
+}
+
+.card-log-player {
+  font-family: var(--ff-d);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-log-text {
+  font-family: var(--ff-d);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-mid);
+  line-height: 1.4;
+}
+
 /* [Claude] ข้อ 4: drawer footer row — ⚙️ | ✕ กลับเกม | 🚪 ออกเกม */
 .drawer-footer-row {
   display: flex;
@@ -980,6 +1094,52 @@ body {
   letter-spacing: 1px;
   opacity: .70;
 }
+
+/* ══════════════════════════════════════════
+   SUIT CORNERS — ดอกไพ่มุมบนซ้าย / ล่างขวา
+   ══════════════════════════════════════════ */
+
+.card-suit-corner {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+/* มุมบนซ้าย */
+.card-suit-corner--tl {
+  top: 12px;
+  left: 14px;
+}
+
+/* มุมขวาล่าง — กลับหัว 180° เหมือนไพ่จริง */
+.card-suit-corner--br {
+  bottom: 12px;
+  right: 14px;
+  transform: rotate(180deg);
+}
+
+/* ── สีดอกไพ่ — theme-aware ─────────────── */
+/* ♠ โพดำ — ใช้ text-primary ของธีม */
+.suit-color-♠ { color: var(--text-primary); }
+
+/* ♣ ดอกจิก — ใช้ text-primary เหมือนกัน */
+.suit-color-♣ { color: var(--text-primary); }
+
+/* ♥ โพแดง — แดง */
+.suit-color-♥ { color: #C0392B; }
+
+/* ♦ ข้าวหลาม — ทองแดง/แดง */
+.suit-color-♦ { color: #C0392B; }
+
+/* dark mode — ♠♣ สว่างขึ้นหน่อยเพื่อ contrast */
+#root.dark .suit-color-♠,
+#root.dark .suit-color-♣ { color: var(--text-primary); }
+
+#root.dark .suit-color-♥,
+#root.dark .suit-color-♦ { color: #E74C3C; }
 
 /* ── DRAW BUTTON LOCKED STATE ───────────── */
 /* [Claude] dim ปุ่มระหว่าง animation — บอกผู้เล่นว่า "รอก่อน" */

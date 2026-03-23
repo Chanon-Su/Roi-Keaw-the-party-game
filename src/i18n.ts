@@ -66,6 +66,10 @@ export const t = {
 
         // --- Drawer ---
         drawerTab:       "ข้อมูลผู้เล่น",
+        drawerTabPlayers: "ผู้เล่น",
+        drawerTabLog:    "ประวัติ",
+        logEmpty:        "ยังไม่มีไพ่ถูกจั่ว",
+        logTurn:         (n: number) => `ใบที่ ${n}`,
 
         // --- Setting popup ---
         settings:        "⚙️ ตั้งค่า",
@@ -140,6 +144,10 @@ export const t = {
 
         // --- Drawer ---
         drawerTab:       "Player Info",
+        drawerTabPlayers: "Players",
+        drawerTabLog:    "History",
+        logEmpty:        "No cards drawn yet",
+        logTurn:         (n: number) => `#${n}`,
 
         // --- Setting popup ---
         settings:        "⚙️ Settings",
@@ -209,16 +217,17 @@ const GAME_STATE_KEY = "cardgame_state";
 
 export type SavedGameState = {
     deckIndices: number[];
+    cardSuits: string[];             // ดอกไพ่ที่ assign ไว้แล้ว index ตรงกับ deckData
     currentPlayerIndex: number;
     playerItems: Record<number, { cardId: string; label_thai: string; label_eng: string }[]>;
     numberCardLeft: number;
     displayCardIndex: number | null;
     displayPlayerName: string;
+    displaySuit: string;             // ดอกของไพ่ที่แสดงอยู่ตอนนี้
     isFlipped: boolean;
     isLastCardDrawn: boolean;
-    // meta — ตรวจว่า state ยังตรงกับ deck ปัจจุบัน
     selectedDeckId: string;
-    savedAt: number;   // timestamp
+    savedAt: number;
 };
 
 export function saveGameState(state: SavedGameState): void {
