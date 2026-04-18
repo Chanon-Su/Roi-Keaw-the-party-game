@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 README.txt
+_agents/*
+README_ARCH.md
